@@ -1,0 +1,614 @@
+/* ==========================================================================
+   THE VAULT: Tactical Command Center Design System
+   Tron Legacy x Batcomputer x Stark Holographic HUD
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --bg-void: #03060A;
+  --bg-gunmetal-1: #0A1118;
+  --bg-gunmetal-2: #101A24;
+  --bg-gunmetal-3: #162330;
+  --neon-cyan: #19F3FF;
+  --neon-cyan-glow: rgba(25, 243, 255, 0.45);
+  --neon-cyan-subtle: rgba(25, 243, 255, 0.12);
+  --neon-amber: #FF9E1F;
+  --neon-amber-glow: rgba(255, 158, 31, 0.5);
+  --neon-amber-subtle: rgba(255, 158, 31, 0.12);
+  --neon-positive: #2CFFB0;
+  --neon-positive-glow: rgba(44, 255, 176, 0.4);
+  --neon-warning: #FFC400;
+  --neon-danger: #FF3B3B;
+  --text-primary: #E8F6FF;
+  --text-muted: #8FA6B8;
+  --text-dim: #546B7E;
+  --border-tactical: 1px solid rgba(25, 243, 255, 0.28);
+  --border-amber: 1px solid rgba(255, 158, 31, 0.35);
+  --glass-panel: rgba(10, 17, 24, 0.88);
+}
+
+/* Base resets & layout */
+html, body, [data-testid="stAppViewContainer"] {
+  background-color: var(--bg-void) !important;
+  color: var(--text-primary) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 16px;
+  letter-spacing: 0.3px;
+}
+
+/* Ambient Cosmic & Grid Background */
+[data-testid="stAppViewContainer"] {
+  background: 
+    radial-gradient(circle at 50% 10%, rgba(25, 243, 255, 0.05) 0%, transparent 60%),
+    radial-gradient(circle at 85% 85%, rgba(255, 158, 31, 0.03) 0%, transparent 40%),
+    linear-gradient(180deg, #03060A 0%, #050A10 100%) !important;
+}
+
+/* Perspective Grid Floor at bottom */
+[data-testid="stAppViewContainer"]::after {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 240px;
+  background: 
+    linear-gradient(180deg, transparent 0%, rgba(25, 243, 255, 0.04) 100%),
+    repeating-linear-gradient(90deg, rgba(25, 243, 255, 0.03) 0px, rgba(25, 243, 255, 0.03) 1px, transparent 1px, transparent 60px),
+    repeating-linear-gradient(0deg, rgba(25, 243, 255, 0.03) 0px, rgba(25, 243, 255, 0.03) 1px, transparent 1px, transparent 40px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+/* Hide Streamlit Header, Hamburger & Deploy Button */
+header[data-testid="stHeader"] {
+  background: transparent !important;
+  visibility: hidden !important;
+  height: 0px !important;
+}
+div[data-testid="stToolbar"] {
+  visibility: hidden !important;
+  display: none !important;
+}
+footer {
+  display: none !important;
+}
+.stDeployButton {
+  display: none !important;
+}
+
+/* Main container padding */
+.block-container {
+  padding-top: 1.2rem !important;
+  padding-bottom: 3.5rem !important;
+  max-width: 95% !important;
+}
+
+/* ==========================================================================
+   COMMAND BAR & HEADERS
+   ========================================================================== */
+
+.command-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: var(--glass-panel);
+  border: var(--border-tactical);
+  border-radius: 10px;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6), inset 0 0 15px rgba(25, 243, 255, 0.06);
+  backdrop-filter: blur(8px);
+}
+
+.command-title {
+  font-family: 'Orbitron', monospace;
+  font-weight: 800;
+  font-size: 1.85rem;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #FFFFFF 0%, #19F3FF 60%, #80F9FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 25px rgba(25, 243, 255, 0.4);
+  text-transform: uppercase;
+}
+
+.command-subtitle {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.status-chip-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.status-chip {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+}
+
+.chip-active {
+  background: rgba(44, 255, 176, 0.12);
+  border: 1px solid var(--neon-positive);
+  color: var(--neon-positive);
+  box-shadow: 0 0 10px rgba(44, 255, 176, 0.25);
+}
+
+.chip-fallback {
+  background: rgba(255, 158, 31, 0.12);
+  border: 1px solid var(--neon-amber);
+  color: var(--neon-amber);
+  box-shadow: 0 0 10px rgba(255, 158, 31, 0.25);
+}
+
+.chip-target {
+  background: rgba(25, 243, 255, 0.12);
+  border: 1px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 10px rgba(25, 243, 255, 0.25);
+}
+
+/* ==========================================================================
+   MODULE CONTAINERS & CHAMFERED CARDS
+   ========================================================================== */
+
+.module-header {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 10px var(--neon-cyan-glow);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 1.6rem 0 0.9rem 0;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(25, 243, 255, 0.25);
+  padding-bottom: 6px;
+}
+
+.module-header::before {
+  content: '//';
+  color: var(--neon-amber);
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* Tactical Hologram Metric Card */
+.holo-metric-card {
+  background: var(--glass-panel);
+  border: var(--border-tactical);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  padding: 16px 20px;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 15px rgba(25, 243, 255, 0.04);
+  backdrop-filter: blur(8px);
+}
+
+.holo-metric-card:hover {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 20px rgba(25, 243, 255, 0.3), inset 0 0 20px rgba(25, 243, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.holo-metric-card::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 12px; height: 12px;
+  border-top: 2px solid var(--neon-cyan);
+  border-right: 2px solid var(--neon-cyan);
+}
+
+.holo-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.holo-val {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  text-shadow: 0 0 12px rgba(25, 243, 255, 0.4);
+  margin: 4px 0;
+}
+
+.holo-delta {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+.holo-delta.positive { color: var(--neon-positive); }
+.holo-delta.amber { color: var(--neon-amber); }
+
+/* ==========================================================================
+   ROTATION HERO CARDS & ARC REACTOR GAUGES
+   ========================================================================== */
+
+.rotation-hero-card {
+  background: var(--glass-panel);
+  border: var(--border-tactical);
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+  padding: 22px 24px;
+  margin-bottom: 1.2rem;
+  position: relative;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.6), inset 0 0 20px rgba(25, 243, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.rotation-hero-card.rank-1 {
+  border: 1px solid var(--neon-amber);
+  box-shadow: 0 0 25px rgba(255, 158, 31, 0.25), inset 0 0 20px rgba(255, 158, 31, 0.06);
+}
+
+.rotation-hero-card:hover {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 30px rgba(25, 243, 255, 0.35);
+  transform: translateY(-2px);
+}
+
+.rank-badge {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  padding: 4px 14px;
+  border-radius: 4px;
+  display: inline-block;
+  text-transform: uppercase;
+}
+
+.rank-badge.gold {
+  background: rgba(255, 158, 31, 0.2);
+  border: 1px solid var(--neon-amber);
+  color: var(--neon-amber);
+  box-shadow: 0 0 12px rgba(255, 158, 31, 0.4);
+}
+
+.rank-badge.cyan {
+  background: rgba(25, 243, 255, 0.15);
+  border: 1px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 12px rgba(25, 243, 255, 0.3);
+}
+
+/* Crop Sequence Timeline */
+.crop-timeline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0 18px 0;
+  flex-wrap: wrap;
+}
+
+.crop-node {
+  background: var(--bg-gunmetal-2);
+  border: 1px solid rgba(25, 243, 255, 0.4);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 0.5px;
+  box-shadow: inset 0 0 10px rgba(25, 243, 255, 0.1);
+}
+
+.crop-arrow {
+  color: var(--neon-cyan);
+  font-size: 1.2rem;
+  text-shadow: 0 0 8px var(--neon-cyan);
+}
+
+/* Arc-Reactor Circular Gauges */
+.gauge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 16px;
+  margin: 18px 0;
+}
+
+.arc-gauge-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.arc-gauge {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 0 15px rgba(0,0,0,0.8);
+}
+
+.arc-gauge-inner {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--bg-gunmetal-1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(25, 243, 255, 0.2);
+}
+
+.arc-score {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.arc-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-top: 6px;
+}
+
+/* ==========================================================================
+   STREAMLIT WIDGET RESTYLING & BUG FIXES
+   ========================================================================== */
+
+/* Sidebar Command Panel */
+[data-testid="stSidebar"] {
+  background-color: #070D14 !important;
+  border-right: 1px solid rgba(25, 243, 255, 0.2) !important;
+  box-shadow: 4px 0 25px rgba(0,0,0,0.8);
+}
+
+[data-testid="stSidebar"] h1, 
+[data-testid="stSidebar"] h2, 
+[data-testid="stSidebar"] h3 {
+  font-family: 'Orbitron', monospace !important;
+  color: var(--neon-cyan) !important;
+  font-size: 0.95rem !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase !important;
+  border-bottom: 1px solid rgba(25, 243, 255, 0.2);
+  padding-bottom: 4px;
+}
+
+/* Sliders: Complete Tron Cyan (Thumb, Filled Track & Value Label) */
+div[data-baseweb="slider"] {
+  padding: 10px 0;
+}
+div[data-baseweb="slider"] div[role="slider"] {
+  background-color: #19F3FF !important;
+  border: 2px solid #FFFFFF !important;
+  box-shadow: 0 0 12px #19F3FF, 0 0 20px #19F3FF !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+/* Filled track before thumb */
+div[data-baseweb="slider"] > div > div:first-child,
+div[data-baseweb="slider"] [data-testid="stTickBar"],
+div[data-baseweb="slider"] div[style*="background-color: rgb(255"] {
+  background: #19F3FF !important;
+}
+/* Value text & labels above/below slider */
+div[data-testid="stSlider"] span,
+div[data-testid="stSlider"] [data-testid="stSliderThumbValue"] {
+  color: #19F3FF !important;
+  font-family: 'Share Tech Mono', monospace !important;
+  font-weight: 700 !important;
+}
+div[data-testid="stSlider"] [data-testid="stSliderTickBarMin"],
+div[data-testid="stSlider"] [data-testid="stSliderTickBarMax"] {
+  color: #8FA6B8 !important;
+  font-family: 'Share Tech Mono', monospace !important;
+}
+
+/* Radio buttons: Cyan Ring */
+div[data-testid="stRadio"] label {
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+  background: transparent !important;
+}
+div[data-testid="stRadio"] div[role="radiogroup"] > label:hover {
+  color: var(--neon-cyan) !important;
+}
+div[data-testid="stRadio"] div[role="radiogroup"] input:checked + div {
+  background-color: var(--neon-cyan) !important;
+  border-color: var(--neon-cyan) !important;
+  box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* Checkboxes (BUG FIX: Plain text label, NO highlight background box) */
+div[data-testid="stCheckbox"] label {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--text-primary) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 600 !important;
+}
+div[data-testid="stCheckbox"] label * {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+div[data-testid="stCheckbox"] label p,
+div[data-testid="stCheckbox"] label span {
+  color: var(--text-primary) !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+div[data-testid="stCheckbox"] input:checked + div {
+  background-color: var(--neon-cyan) !important;
+  border-color: var(--neon-cyan) !important;
+  box-shadow: 0 0 8px var(--neon-cyan) !important;
+}
+
+/* Dropdown / Selectbox */
+div[data-baseweb="select"] > div {
+  background-color: var(--bg-gunmetal-2) !important;
+  border: var(--border-tactical) !important;
+  border-radius: 6px !important;
+  color: var(--text-primary) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 600 !important;
+}
+div[data-baseweb="select"] > div:hover {
+  border-color: var(--neon-cyan) !important;
+  box-shadow: 0 0 10px rgba(25, 243, 255, 0.25);
+}
+div[data-baseweb="popover"], div[data-baseweb="menu"] {
+  background-color: #070D14 !important;
+  border: var(--border-tactical) !important;
+  color: var(--text-primary) !important;
+}
+li[role="option"] {
+  background-color: #070D14 !important;
+  color: var(--text-primary) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+}
+li[role="option"]:hover, li[aria-selected="true"] {
+  background-color: rgba(25, 243, 255, 0.15) !important;
+  color: var(--neon-cyan) !important;
+}
+
+/* Number inputs */
+div[data-testid="stNumberInput"] input {
+  background-color: var(--bg-gunmetal-2) !important;
+  border: var(--border-tactical) !important;
+  color: #FFFFFF !important;
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 1rem !important;
+}
+div[data-testid="stNumberInput"] button {
+  background-color: var(--bg-gunmetal-3) !important;
+  border: var(--border-tactical) !important;
+  color: var(--neon-cyan) !important;
+}
+
+/* Buttons: Neon sweep & Tactical Press */
+div.stButton > button {
+  background: linear-gradient(135deg, rgba(25, 243, 255, 0.15) 0%, rgba(10, 17, 24, 0.9) 100%) !important;
+  border: 1px solid var(--neon-cyan) !important;
+  color: var(--neon-cyan) !important;
+  font-family: 'Orbitron', monospace !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.5px !important;
+  padding: 10px 24px !important;
+  border-radius: 6px !important;
+  text-transform: uppercase !important;
+  box-shadow: 0 0 15px rgba(25, 243, 255, 0.25) !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  width: 100%;
+}
+div.stButton > button:hover {
+  background: var(--neon-cyan) !important;
+  color: #03060A !important;
+  box-shadow: 0 0 25px var(--neon-cyan), 0 0 45px rgba(25, 243, 255, 0.5) !important;
+  transform: translateY(-2px);
+}
+div.stButton > button:active {
+  transform: translateY(1px);
+}
+
+/* Tabs: Horizontal Scroll & No Clipping (BUG FIX) */
+div[data-baseweb="tab-list"] {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--neon-cyan) transparent !important;
+  gap: 8px !important;
+  padding-bottom: 4px !important;
+  width: 100% !important;
+}
+div[data-baseweb="tab-list"]::-webkit-scrollbar {
+  height: 4px;
+}
+div[data-baseweb="tab-list"]::-webkit-scrollbar-thumb {
+  background: var(--neon-cyan);
+  border-radius: 2px;
+}
+button[data-baseweb="tab"] {
+  font-family: 'Orbitron', monospace !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.8px !important;
+  white-space: nowrap !important;
+  color: var(--text-muted) !important;
+  text-transform: uppercase !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 8px 14px !important;
+  flex-shrink: 0 !important;
+}
+button[data-baseweb="tab"][aria-selected="true"] {
+  color: var(--neon-cyan) !important;
+  text-shadow: 0 0 10px var(--neon-cyan-glow);
+  border-bottom: 2px solid var(--neon-cyan) !important;
+}
+
+/* Expanders */
+div[data-testid="stExpander"] {
+  background: var(--bg-gunmetal-1) !important;
+  border: var(--border-tactical) !important;
+  border-radius: 8px !important;
+  margin-top: 10px !important;
+}
+div[data-testid="stExpander"] summary {
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  color: var(--neon-cyan) !important;
+  letter-spacing: 0.5px;
+}
+
+/* Tables & Dataframes */
+div[data-testid="stDataFrame"] {
+  border: var(--border-tactical) !important;
+  border-radius: 8px !important;
+  background: var(--bg-gunmetal-1) !important;
+}
+
+/* Info & Warning callouts */
+div[data-testid="stAlert"] {
+  background: rgba(10, 17, 24, 0.95) !important;
+  border: 1px solid rgba(25, 243, 255, 0.4) !important;
+  color: var(--text-primary) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 15px rgba(25, 243, 255, 0.15);
+}
+
+/* Tooltips */
+div[data-testid="stTooltipIcon"] svg {
+  fill: var(--neon-cyan) !important;
+}
