@@ -1,0 +1,877 @@
+/* ==========================================================================
+   THE VAULT: Tactical Command Center Design System
+   Tron Legacy x Batcomputer x Stark Holographic HUD
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --bg-void: #03060A;
+  --bg-gunmetal-1: #0A1118;
+  --bg-gunmetal-2: #101A24;
+  --bg-gunmetal-3: #162330;
+  --neon-cyan: #19F3FF;
+  --neon-cyan-glow: rgba(25, 243, 255, 0.45);
+  --neon-cyan-subtle: rgba(25, 243, 255, 0.12);
+  --neon-amber: #FF9E1F;
+  --neon-amber-glow: rgba(255, 158, 31, 0.5);
+  --neon-amber-subtle: rgba(255, 158, 31, 0.12);
+  --neon-positive: #2CFFB0;
+  --neon-positive-glow: rgba(44, 255, 176, 0.4);
+  --neon-warning: #FFC400;
+  --neon-danger: #FF3B3B;
+  --text-primary: #E8F6FF;
+  --text-muted: #8FA6B8;
+  --text-dim: #546B7E;
+  --border-tactical: 1px solid rgba(25, 243, 255, 0.28);
+  --border-amber: 1px solid rgba(255, 158, 31, 0.35);
+  --glass-panel: rgba(10, 17, 24, 0.88);
+}
+
+/* Base resets & layout */
+html, body, [data-testid="stAppViewContainer"] {
+  background-color: var(--bg-void) !important;
+  color: var(--text-primary) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 16px;
+  letter-spacing: 0.3px;
+}
+
+/* Ambient Cosmic & Grid Background */
+[data-testid="stAppViewContainer"] {
+  background: 
+    radial-gradient(circle at 50% 10%, rgba(25, 243, 255, 0.05) 0%, transparent 60%),
+    radial-gradient(circle at 85% 85%, rgba(255, 158, 31, 0.03) 0%, transparent 40%),
+    linear-gradient(180deg, #03060A 0%, #050A10 100%) !important;
+}
+
+/* Perspective Grid Floor at bottom */
+[data-testid="stAppViewContainer"]::after {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 240px;
+  background: 
+    linear-gradient(180deg, transparent 0%, rgba(25, 243, 255, 0.04) 100%),
+    repeating-linear-gradient(90deg, rgba(25, 243, 255, 0.03) 0px, rgba(25, 243, 255, 0.03) 1px, transparent 1px, transparent 60px),
+    repeating-linear-gradient(0deg, rgba(25, 243, 255, 0.03) 0px, rgba(25, 243, 255, 0.03) 1px, transparent 1px, transparent 40px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+/* Hide Streamlit Header, Hamburger & Deploy Button */
+header[data-testid="stHeader"] {
+  background: transparent !important;
+  visibility: hidden !important;
+  height: 0px !important;
+}
+div[data-testid="stToolbar"] {
+  visibility: hidden !important;
+  display: none !important;
+}
+footer {
+  display: none !important;
+}
+.stDeployButton {
+  display: none !important;
+}
+
+/* Main container padding */
+.block-container {
+  padding-top: 1.2rem !important;
+  padding-bottom: 3.5rem !important;
+  max-width: 95% !important;
+}
+
+/* ==========================================================================
+   COMMAND BAR & HEADERS
+   ========================================================================== */
+
+.command-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: var(--glass-panel);
+  border: var(--border-tactical);
+  border-radius: 10px;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6), inset 0 0 15px rgba(25, 243, 255, 0.06);
+  backdrop-filter: blur(8px);
+}
+
+.command-title {
+  font-family: 'Orbitron', monospace;
+  font-weight: 800;
+  font-size: 1.85rem;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #FFFFFF 0%, #19F3FF 60%, #80F9FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 25px rgba(25, 243, 255, 0.4);
+  text-transform: uppercase;
+}
+
+.command-subtitle {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.status-chip-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.status-chip {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+}
+
+.chip-active {
+  background: rgba(44, 255, 176, 0.12);
+  border: 1px solid var(--neon-positive);
+  color: var(--neon-positive);
+  box-shadow: 0 0 10px rgba(44, 255, 176, 0.25);
+}
+
+.chip-fallback {
+  background: rgba(255, 158, 31, 0.12);
+  border: 1px solid var(--neon-amber);
+  color: var(--neon-amber);
+  box-shadow: 0 0 10px rgba(255, 158, 31, 0.25);
+}
+
+.chip-target {
+  background: rgba(25, 243, 255, 0.12);
+  border: 1px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 10px rgba(25, 243, 255, 0.25);
+}
+
+/* ==========================================================================
+   MODULE CONTAINERS & CHAMFERED CARDS
+   ========================================================================== */
+
+.module-header {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 10px var(--neon-cyan-glow);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 1.6rem 0 0.9rem 0;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(25, 243, 255, 0.25);
+  padding-bottom: 6px;
+}
+
+.module-header::before {
+  content: '//';
+  color: var(--neon-amber);
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* Tactical Hologram Metric Card */
+.holo-metric-card {
+  background: var(--glass-panel);
+  border: var(--border-tactical);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  padding: 16px 20px;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 0 15px rgba(25, 243, 255, 0.04);
+  backdrop-filter: blur(8px);
+}
+
+.holo-metric-card:hover {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 20px rgba(25, 243, 255, 0.3), inset 0 0 20px rgba(25, 243, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.holo-metric-card::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 12px; height: 12px;
+  border-top: 2px solid var(--neon-cyan);
+  border-right: 2px solid var(--neon-cyan);
+}
+
+.holo-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.holo-val {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  text-shadow: 0 0 12px rgba(25, 243, 255, 0.4);
+  margin: 4px 0;
+}
+
+.holo-delta {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+.holo-delta.positive { color: var(--neon-positive); }
+.holo-delta.amber { color: var(--neon-amber); }
+
+/* ==========================================================================
+   ROTATION HERO CARDS & ARC REACTOR GAUGES
+   ========================================================================== */
+
+.rotation-hero-card {
+  background: var(--glass-panel);
+  border: var(--border-tactical);
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+  padding: 22px 24px;
+  margin-bottom: 1.2rem;
+  position: relative;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.6), inset 0 0 20px rgba(25, 243, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.rotation-hero-card.rank-1 {
+  border: 1px solid var(--neon-amber);
+  box-shadow: 0 0 25px rgba(255, 158, 31, 0.25), inset 0 0 20px rgba(255, 158, 31, 0.06);
+}
+
+.rotation-hero-card:hover {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 30px rgba(25, 243, 255, 0.35);
+  transform: translateY(-2px);
+}
+
+.rank-badge {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  padding: 4px 14px;
+  border-radius: 4px;
+  display: inline-block;
+  text-transform: uppercase;
+}
+
+.rank-badge.gold {
+  background: rgba(255, 158, 31, 0.2);
+  border: 1px solid var(--neon-amber);
+  color: var(--neon-amber);
+  box-shadow: 0 0 12px rgba(255, 158, 31, 0.4);
+}
+
+.rank-badge.cyan {
+  background: rgba(25, 243, 255, 0.15);
+  border: 1px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 12px rgba(25, 243, 255, 0.3);
+}
+
+/* Crop Sequence Timeline */
+.crop-timeline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0 18px 0;
+  flex-wrap: wrap;
+}
+
+.crop-node {
+  background: var(--bg-gunmetal-2);
+  border: 1px solid rgba(25, 243, 255, 0.4);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 0.5px;
+  box-shadow: inset 0 0 10px rgba(25, 243, 255, 0.1);
+}
+
+.crop-arrow {
+  color: var(--neon-cyan);
+  font-size: 1.2rem;
+  text-shadow: 0 0 8px var(--neon-cyan);
+}
+
+/* Arc-Reactor Circular Gauges */
+.gauge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 16px;
+  margin: 18px 0;
+}
+
+.arc-gauge-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.arc-gauge {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 0 15px rgba(0,0,0,0.8);
+}
+
+.arc-gauge-inner {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--bg-gunmetal-1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(25, 243, 255, 0.2);
+}
+
+.arc-score {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.arc-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-top: 6px;
+}
+
+/* ==========================================================================
+   STREAMLIT WIDGET RESTYLING & THE LIGHTSABER SLIDERS
+   ========================================================================== */
+
+/* Sidebar Command Panel */
+[data-testid="stSidebar"] {
+  background-color: #070D14 !important;
+  border-right: 1px solid rgba(25, 243, 255, 0.2) !important;
+  box-shadow: 4px 0 25px rgba(0,0,0,0.8);
+}
+
+[data-testid="stSidebar"] h1, 
+[data-testid="stSidebar"] h2, 
+[data-testid="stSidebar"] h3 {
+  font-family: 'Orbitron', monospace !important;
+  color: var(--neon-cyan) !important;
+  font-size: 0.95rem !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase !important;
+  border-bottom: 1px solid rgba(25, 243, 255, 0.2);
+  padding-bottom: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   P1: LIGHTSABER SLIDERS (1 TO 5 SCALE)
+   -------------------------------------------------------------------------- */
+
+/* Dynamic Fill percentage based on aria-valuenow */
+div[data-testid="stSlider"] {
+  --blade-fill: 10%;
+  padding-left: 16px;
+  position: relative !important;
+}
+div[data-testid="stSlider"]:has([role="slider"][aria-valuenow="1"]) { --blade-fill: 4%; }
+div[data-testid="stSlider"]:has([role="slider"][aria-valuenow="2"]) { --blade-fill: 27%; }
+div[data-testid="stSlider"]:has([role="slider"][aria-valuenow="3"]) { --blade-fill: 52%; }
+div[data-testid="stSlider"]:has([role="slider"][aria-valuenow="4"]) { --blade-fill: 76%; }
+div[data-testid="stSlider"]:has([role="slider"][aria-valuenow="5"]) { --blade-fill: 100%; }
+
+div[data-baseweb="slider"] {
+  padding: 12px 0 14px 0 !important;
+  position: relative !important;
+}
+
+/* Lightsaber Gunmetal Hilt (Flush aligned with blade center line, pointer-events none) */
+div[data-baseweb="slider"] > div > div:first-child::before {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 8px;
+  background: linear-gradient(90deg, #1e293b 0%, #334155 40%, #475569 75%, #FF9E1F 92%, #FF9E1F 100%);
+  border-radius: 2px 0 0 2px;
+  border: 1px solid #475569;
+  border-right: 2px solid #FF9E1F;
+  box-shadow: 0 0 6px rgba(255, 158, 31, 0.4);
+  pointer-events: none !important;
+  z-index: 5;
+}
+
+/* The Lightsaber Track & Plasma Blade - Stable Glow, No Keyframe Flicker */
+div[data-baseweb="slider"] > div > div:first-child {
+  height: 6px !important;
+  border-radius: 3px !important;
+  /* White-hot core + cyan blade up to var(--blade-fill), then faint dark unlit track */
+  background: linear-gradient(
+    90deg,
+    #FFFFFF 0%,
+    #19F3FF 6px,
+    #19F3FF var(--blade-fill, 50%),
+    rgba(10, 20, 30, 0.85) var(--blade-fill, 50%),
+    rgba(10, 20, 30, 0.85) 100%
+  ) !important;
+  box-shadow: 
+    0 0 6px rgba(25, 243, 255, 0.5),
+    0 0 14px rgba(25, 243, 255, 0.25),
+    inset 0 0 3px rgba(255, 255, 255, 0.3) !important;
+  border: 1px solid rgba(25, 243, 255, 0.2) !important;
+  position: relative !important;
+  transition: background 200ms ease-out, box-shadow 200ms ease-out !important;
+}
+
+/* Subtle Hover Glow (<=15% increase, no jump or keyframe loop) */
+div[data-baseweb="slider"]:hover > div > div:first-child {
+  box-shadow: 
+    0 0 8px rgba(25, 243, 255, 0.6),
+    0 0 16px rgba(25, 243, 255, 0.3),
+    inset 0 0 4px rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Thumb: Plasma Flare Glow Orb at the blade tip */
+div[data-baseweb="slider"] div[role="slider"] {
+  background: radial-gradient(circle at 35% 35%, #FFFFFF 0%, #19F3FF 55%, #0099FF 100%) !important;
+  border: 2px solid #FFFFFF !important;
+  box-shadow: 0 0 10px #FFFFFF, 0 0 18px #19F3FF !important;
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 50% !important;
+  cursor: grab !important;
+  z-index: 10 !important;
+  transition: transform 180ms ease, box-shadow 180ms ease !important;
+}
+
+div[data-baseweb="slider"]:hover div[role="slider"] {
+  transform: scale(1.12) !important;
+  box-shadow: 0 0 12px #FFFFFF, 0 0 22px #19F3FF !important;
+}
+
+div[data-baseweb="slider"] div[role="slider"]:active {
+  cursor: grabbing !important;
+  transform: scale(1.2) !important;
+}
+
+/* Value text above thumb: Crisp White / Cyan (NO RED) */
+div[data-testid="stSlider"] span,
+div[data-testid="stSliderThumbValue"],
+div[data-baseweb="slider"] [role="slider"] > div {
+  color: #FFFFFF !important;
+  background: transparent !important;
+  font-family: 'Share Tech Mono', monospace !important;
+  font-weight: 800 !important;
+  font-size: 13px !important;
+  text-shadow: 0 0 8px #19F3FF, 0 0 14px #19F3FF !important;
+  pointer-events: none !important;
+}
+
+/* Ticks 1 to 5 under the track: Light & readable, unclipped */
+div[data-testid="stSlider"] [data-testid="stSliderTickBarMin"],
+div[data-testid="stSlider"] [data-testid="stSliderTickBarMax"],
+div[data-testid="stTickBar"],
+div[data-testid="stTickBar"] * {
+  color: #8FA6B8 !important;
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  pointer-events: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   P2: RADIO BUTTON RESTYLING (NO HIGHLIGHT BOXES, CYAN DOT)
+   -------------------------------------------------------------------------- */
+
+/* Clean text container: NO cyan background block */
+div[data-testid="stRadio"] div[role="radiogroup"] label {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--text-primary) !important;
+  cursor: pointer !important;
+  margin-bottom: 4px !important;
+}
+
+div[data-testid="stRadio"] div[role="radiogroup"] label * {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+div[data-testid="stRadio"] div[role="radiogroup"] label p,
+div[data-testid="stRadio"] div[role="radiogroup"] label span {
+  color: var(--text-primary) !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  box-shadow: none !important;
+}
+
+div[data-testid="stRadio"] div[role="radiogroup"] label:hover p {
+  color: var(--neon-cyan) !important;
+}
+
+/* The Radio Outer Circle */
+div[data-testid="stRadio"] div[role="radiogroup"] label > div:first-child {
+  background: rgba(10, 17, 24, 0.9) !important;
+  border: 1px solid rgba(25, 243, 255, 0.4) !important;
+  border-radius: 50% !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Selected state: glowing cyan ring + cyan dot */
+div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) > div:first-child {
+  border-color: #19F3FF !important;
+  box-shadow: 0 0 10px #19F3FF !important;
+}
+
+div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) > div:first-child > div,
+div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) > div:first-child span,
+div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) > div:first-child svg {
+  background-color: #19F3FF !important;
+  border-color: #19F3FF !important;
+  fill: #19F3FF !important;
+  box-shadow: 0 0 8px #19F3FF !important;
+}
+
+/* --------------------------------------------------------------------------
+   P0: CHECKBOXES (CLEAN LABEL, CYAN CHECKBOX, NO RED BORDER, NO FLASH)
+   -------------------------------------------------------------------------- */
+div[data-testid="stCheckbox"],
+div[data-testid="stCheckbox"] label,
+div[data-testid="stCheckbox"] label:hover,
+div[data-testid="stCheckbox"] label:focus,
+div[data-testid="stCheckbox"] label:active,
+div[data-testid="stCheckbox"] label:focus-within {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--text-primary) !important;
+  cursor: pointer !important;
+}
+
+div[data-testid="stCheckbox"] label *,
+div[data-testid="stCheckbox"] label div,
+div[data-testid="stCheckbox"] label span,
+div[data-testid="stCheckbox"] label p {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+div[data-testid="stCheckbox"] label p,
+div[data-testid="stCheckbox"] label span {
+  color: var(--text-primary) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  transition: color 150ms ease !important;
+}
+
+div[data-testid="stCheckbox"] label:hover p,
+div[data-testid="stCheckbox"] label:hover span {
+  color: var(--neon-cyan) !important;
+}
+
+/* Unchecked Checkbox Square - Cyan outline, dark body, absolutely NO red */
+div[data-testid="stCheckbox"] input + span,
+div[data-testid="stCheckbox"] [data-baseweb="checkbox"] > span,
+div[data-testid="stCheckbox"] [data-baseweb="checkbox"] > span:first-of-type {
+  border: 1px solid rgba(25, 243, 255, 0.5) !important;
+  border-color: rgba(25, 243, 255, 0.5) !important;
+  background-color: rgba(10, 17, 24, 0.9) !important;
+  background: rgba(10, 17, 24, 0.9) !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  transition: border-color 150ms ease, box-shadow 150ms ease !important;
+}
+
+/* Checkbox Hover */
+div[data-testid="stCheckbox"]:hover input + span,
+div[data-testid="stCheckbox"]:hover [data-baseweb="checkbox"] > span {
+  border-color: #19F3FF !important;
+  box-shadow: 0 0 8px rgba(25, 243, 255, 0.4) !important;
+}
+
+/* Keyboard focus: thin cyan outline on the box only */
+div[data-testid="stCheckbox"] input:focus-visible + span,
+div[data-testid="stCheckbox"] input:focus + span {
+  outline: 2px solid #19F3FF !important;
+  outline-offset: 2px !important;
+  border-color: #19F3FF !important;
+}
+
+/* Checked Checkbox Square - Solid cyan with glowing aura (STRICTLY ON SPAN, NOT DIV) */
+div[data-testid="stCheckbox"] input:checked + span,
+div[data-testid="stCheckbox"] [data-baseweb="checkbox"]:has(input:checked) > span {
+  background-color: #19F3FF !important;
+  background: #19F3FF !important;
+  border-color: #19F3FF !important;
+  box-shadow: 0 0 10px #19F3FF !important;
+}
+
+/* Checkmark SVG inside the box */
+div[data-testid="stCheckbox"] input:checked + span svg,
+div[data-testid="stCheckbox"] [data-baseweb="checkbox"] svg,
+div[data-testid="stCheckbox"] [data-baseweb="checkbox"] svg path {
+  stroke: #03060A !important;
+  fill: #03060A !important;
+  color: #03060A !important;
+}
+
+/* The label container div MUST STAY TRANSPARENT in ALL states */
+div[data-testid="stCheckbox"] [data-baseweb="checkbox"] > div,
+div[data-testid="stCheckbox"] input:checked ~ div,
+div[data-testid="stCheckbox"] [data-baseweb="checkbox"]:hover > div,
+div[data-testid="stCheckbox"] [data-baseweb="checkbox"]:active > div {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   DROPDOWNS / SELECTBOXES
+   -------------------------------------------------------------------------- */
+div[data-baseweb="select"] > div {
+  background-color: var(--bg-gunmetal-2) !important;
+  border: var(--border-tactical) !important;
+  border-radius: 6px !important;
+  color: var(--text-primary) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 600 !important;
+}
+div[data-baseweb="select"] > div:hover {
+  border-color: var(--neon-cyan) !important;
+  box-shadow: 0 0 10px rgba(25, 243, 255, 0.25);
+}
+div[data-baseweb="popover"], div[data-baseweb="menu"] {
+  background-color: #070D14 !important;
+  border: var(--border-tactical) !important;
+  color: var(--text-primary) !important;
+}
+li[role="option"] {
+  background-color: #070D14 !important;
+  color: var(--text-primary) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+}
+li[role="option"]:hover, li[aria-selected="true"] {
+  background-color: rgba(25, 243, 255, 0.15) !important;
+  color: var(--neon-cyan) !important;
+}
+
+/* --------------------------------------------------------------------------
+   NUMBER INPUTS
+   -------------------------------------------------------------------------- */
+div[data-testid="stNumberInput"] input {
+  background-color: var(--bg-gunmetal-2) !important;
+  border: var(--border-tactical) !important;
+  color: #FFFFFF !important;
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 1rem !important;
+}
+div[data-testid="stNumberInput"] button {
+  background-color: var(--bg-gunmetal-3) !important;
+  border: var(--border-tactical) !important;
+  color: var(--neon-cyan) !important;
+}
+
+/* --------------------------------------------------------------------------
+   BUTTONS
+   -------------------------------------------------------------------------- */
+div.stButton > button {
+  background: linear-gradient(135deg, rgba(25, 243, 255, 0.15) 0%, rgba(10, 17, 24, 0.9) 100%) !important;
+  border: 1px solid var(--neon-cyan) !important;
+  color: var(--neon-cyan) !important;
+  font-family: 'Orbitron', monospace !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.5px !important;
+  padding: 10px 24px !important;
+  border-radius: 6px !important;
+  text-transform: uppercase !important;
+  box-shadow: 0 0 15px rgba(25, 243, 255, 0.25) !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  width: 100%;
+}
+div.stButton > button:hover {
+  background: var(--neon-cyan) !important;
+  color: #03060A !important;
+  box-shadow: 0 0 25px var(--neon-cyan), 0 0 45px rgba(25, 243, 255, 0.5) !important;
+  transform: translateY(-2px);
+}
+div.stButton > button:active {
+  transform: translateY(1px);
+}
+
+/* --------------------------------------------------------------------------
+   TABS: HORIZONTAL SCROLL & NO CLIPPING
+   -------------------------------------------------------------------------- */
+div[data-baseweb="tab-list"] {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--neon-cyan) transparent !important;
+  gap: 8px !important;
+  padding-bottom: 4px !important;
+  width: 100% !important;
+}
+div[data-baseweb="tab-list"]::-webkit-scrollbar {
+  height: 4px;
+}
+div[data-baseweb="tab-list"]::-webkit-scrollbar-thumb {
+  background: var(--neon-cyan);
+  border-radius: 2px;
+}
+button[data-baseweb="tab"] {
+  font-family: 'Orbitron', monospace !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.8px !important;
+  white-space: nowrap !important;
+  color: var(--text-muted) !important;
+  text-transform: uppercase !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 8px 14px !important;
+  flex-shrink: 0 !important;
+}
+button[data-baseweb="tab"][aria-selected="true"] {
+  color: var(--neon-cyan) !important;
+  text-shadow: 0 0 10px var(--neon-cyan-glow);
+  border-bottom: 2px solid var(--neon-cyan) !important;
+}
+
+/* --------------------------------------------------------------------------
+   EXPANDERS, DATAFRAMES, ALERTS & TOOLTIPS
+   -------------------------------------------------------------------------- */
+div[data-testid="stExpander"] {
+  background: var(--bg-gunmetal-1) !important;
+  border: var(--border-tactical) !important;
+  border-radius: 8px !important;
+  margin-top: 10px !important;
+}
+div[data-testid="stExpander"] summary {
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  color: var(--neon-cyan) !important;
+  letter-spacing: 0.5px;
+}
+
+div[data-testid="stDataFrame"] {
+  border: var(--border-tactical) !important;
+  border-radius: 8px !important;
+  background: var(--bg-gunmetal-1) !important;
+}
+
+div[data-testid="stAlert"] {
+  background: rgba(10, 17, 24, 0.95) !important;
+  border: 1px solid rgba(25, 243, 255, 0.4) !important;
+  color: var(--text-primary) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 15px rgba(25, 243, 255, 0.15);
+}
+
+div[data-testid="stTooltipIcon"] svg {
+  fill: var(--neon-cyan) !important;
+}
+
+/* ==========================================================================
+   TACTICAL SATELLITE MAP (NASA GIBS INTEGRATION)
+   ========================================================================== */
+
+/* Subtle dark-teal tint to the satellite tile layer */
+div[data-testid="stPlotlyChart"] .mapboxgl-canvas,
+div[data-testid="stPlotlyChart"] canvas {
+  filter: brightness(0.86) contrast(1.15) saturate(0.92) !important;
+}
+
+/* Map frame & Chamfered styling */
+div[data-testid="stPlotlyChart"]:has(.mapboxgl-map) {
+  border: var(--border-tactical) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.8), inset 0 0 15px rgba(25, 243, 255, 0.05) !important;
+  overflow: hidden !important;
+  background-color: var(--bg-gunmetal-1) !important;
+}
+
+/* Mapbox GL Navigation controls (Zoom buttons) */
+.mapboxgl-ctrl-group {
+  background: rgba(10, 17, 24, 0.9) !important;
+  border: 1px solid rgba(25, 243, 255, 0.4) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 10px rgba(0,0,0,0.7) !important;
+}
+
+.mapboxgl-ctrl-group button {
+  background-color: transparent !important;
+  border-bottom: 1px solid rgba(25, 243, 255, 0.2) !important;
+}
+
+.mapboxgl-ctrl-group button:hover {
+  background-color: rgba(25, 243, 255, 0.15) !important;
+}
+
+.mapboxgl-ctrl-icon {
+  filter: invert(1) drop-shadow(0 0 2px #19F3FF) !important;
+}
+
+/* Mapbox Attribution Box */
+.mapboxgl-ctrl-attrib {
+  background: rgba(7, 13, 20, 0.85) !important;
+  color: #8FA6B8 !important;
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 10px !important;
+  border-top-left-radius: 4px !important;
+  border: 1px solid rgba(25, 243, 255, 0.25) !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  padding: 2px 6px !important;
+}
+
+.mapboxgl-ctrl-attrib a {
+  color: #19F3FF !important;
+  text-decoration: none !important;
+}

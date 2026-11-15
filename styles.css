@@ -377,7 +377,7 @@ footer {
 }
 
 /* ==========================================================================
-   STREAMLIT WIDGET RESTYLING & BUG FIXES
+   STREAMLIT WIDGET RESTYLING & THE LIGHTSABER SLIDERS
    ========================================================================== */
 
 /* Sidebar Command Panel */
@@ -399,80 +399,280 @@ footer {
   padding-bottom: 4px;
 }
 
-/* Sliders: Complete Tron Cyan (Thumb, Filled Track & Value Label) */
+/* --------------------------------------------------------------------------
+   P1: LIGHTSABER SLIDERS (1 TO 5 SCALE)
+   -------------------------------------------------------------------------- */
+
+/* Dynamic Fill percentage based on aria-valuenow */
+div[data-testid="stSlider"] {
+  --blade-fill: 10%;
+  padding-left: 16px;
+  position: relative !important;
+}
+div[data-testid="stSlider"]:has([role="slider"][aria-valuenow="1"]) { --blade-fill: 4%; }
+div[data-testid="stSlider"]:has([role="slider"][aria-valuenow="2"]) { --blade-fill: 27%; }
+div[data-testid="stSlider"]:has([role="slider"][aria-valuenow="3"]) { --blade-fill: 52%; }
+div[data-testid="stSlider"]:has([role="slider"][aria-valuenow="4"]) { --blade-fill: 76%; }
+div[data-testid="stSlider"]:has([role="slider"][aria-valuenow="5"]) { --blade-fill: 100%; }
+
 div[data-baseweb="slider"] {
-  padding: 10px 0;
+  padding: 12px 0 14px 0 !important;
+  position: relative !important;
 }
+
+/* Lightsaber Gunmetal Hilt (Flush aligned with blade center line, pointer-events none) */
+div[data-baseweb="slider"] > div > div:first-child::before {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 8px;
+  background: linear-gradient(90deg, #1e293b 0%, #334155 40%, #475569 75%, #FF9E1F 92%, #FF9E1F 100%);
+  border-radius: 2px 0 0 2px;
+  border: 1px solid #475569;
+  border-right: 2px solid #FF9E1F;
+  box-shadow: 0 0 6px rgba(255, 158, 31, 0.4);
+  pointer-events: none !important;
+  z-index: 5;
+}
+
+/* The Lightsaber Track & Plasma Blade - Stable Glow, No Keyframe Flicker */
+div[data-baseweb="slider"] > div > div:first-child {
+  height: 6px !important;
+  border-radius: 3px !important;
+  /* White-hot core + cyan blade up to var(--blade-fill), then faint dark unlit track */
+  background: linear-gradient(
+    90deg,
+    #FFFFFF 0%,
+    #19F3FF 6px,
+    #19F3FF var(--blade-fill, 50%),
+    rgba(10, 20, 30, 0.85) var(--blade-fill, 50%),
+    rgba(10, 20, 30, 0.85) 100%
+  ) !important;
+  box-shadow: 
+    0 0 6px rgba(25, 243, 255, 0.5),
+    0 0 14px rgba(25, 243, 255, 0.25),
+    inset 0 0 3px rgba(255, 255, 255, 0.3) !important;
+  border: 1px solid rgba(25, 243, 255, 0.2) !important;
+  position: relative !important;
+  transition: background 200ms ease-out, box-shadow 200ms ease-out !important;
+}
+
+/* Subtle Hover Glow (<=15% increase, no jump or keyframe loop) */
+div[data-baseweb="slider"]:hover > div > div:first-child {
+  box-shadow: 
+    0 0 8px rgba(25, 243, 255, 0.6),
+    0 0 16px rgba(25, 243, 255, 0.3),
+    inset 0 0 4px rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Thumb: Plasma Flare Glow Orb at the blade tip */
 div[data-baseweb="slider"] div[role="slider"] {
-  background-color: #19F3FF !important;
+  background: radial-gradient(circle at 35% 35%, #FFFFFF 0%, #19F3FF 55%, #0099FF 100%) !important;
   border: 2px solid #FFFFFF !important;
-  box-shadow: 0 0 12px #19F3FF, 0 0 20px #19F3FF !important;
-  width: 18px !important;
-  height: 18px !important;
+  box-shadow: 0 0 10px #FFFFFF, 0 0 18px #19F3FF !important;
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 50% !important;
+  cursor: grab !important;
+  z-index: 10 !important;
+  transition: transform 180ms ease, box-shadow 180ms ease !important;
 }
-/* Filled track before thumb */
-div[data-baseweb="slider"] > div > div:first-child,
-div[data-baseweb="slider"] [data-testid="stTickBar"],
-div[data-baseweb="slider"] div[style*="background-color: rgb(255"] {
-  background: #19F3FF !important;
+
+div[data-baseweb="slider"]:hover div[role="slider"] {
+  transform: scale(1.12) !important;
+  box-shadow: 0 0 12px #FFFFFF, 0 0 22px #19F3FF !important;
 }
-/* Value text & labels above/below slider */
+
+div[data-baseweb="slider"] div[role="slider"]:active {
+  cursor: grabbing !important;
+  transform: scale(1.2) !important;
+}
+
+/* Value text above thumb: Crisp White / Cyan (NO RED) */
 div[data-testid="stSlider"] span,
-div[data-testid="stSlider"] [data-testid="stSliderThumbValue"] {
-  color: #19F3FF !important;
+div[data-testid="stSliderThumbValue"],
+div[data-baseweb="slider"] [role="slider"] > div {
+  color: #FFFFFF !important;
+  background: transparent !important;
   font-family: 'Share Tech Mono', monospace !important;
-  font-weight: 700 !important;
+  font-weight: 800 !important;
+  font-size: 13px !important;
+  text-shadow: 0 0 8px #19F3FF, 0 0 14px #19F3FF !important;
+  pointer-events: none !important;
 }
+
+/* Ticks 1 to 5 under the track: Light & readable, unclipped */
 div[data-testid="stSlider"] [data-testid="stSliderTickBarMin"],
-div[data-testid="stSlider"] [data-testid="stSliderTickBarMax"] {
+div[data-testid="stSlider"] [data-testid="stSliderTickBarMax"],
+div[data-testid="stTickBar"],
+div[data-testid="stTickBar"] * {
   color: #8FA6B8 !important;
   font-family: 'Share Tech Mono', monospace !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  pointer-events: none !important;
 }
 
-/* Radio buttons: Cyan Ring */
-div[data-testid="stRadio"] label {
-  font-family: 'Rajdhani', sans-serif !important;
-  font-weight: 600 !important;
+/* --------------------------------------------------------------------------
+   P2: RADIO BUTTON RESTYLING (NO HIGHLIGHT BOXES, CYAN DOT)
+   -------------------------------------------------------------------------- */
+
+/* Clean text container: NO cyan background block */
+div[data-testid="stRadio"] div[role="radiogroup"] label {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--text-primary) !important;
+  cursor: pointer !important;
+  margin-bottom: 4px !important;
+}
+
+div[data-testid="stRadio"] div[role="radiogroup"] label * {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+div[data-testid="stRadio"] div[role="radiogroup"] label p,
+div[data-testid="stRadio"] div[role="radiogroup"] label span {
   color: var(--text-primary) !important;
   background: transparent !important;
+  background-color: transparent !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  box-shadow: none !important;
 }
-div[data-testid="stRadio"] div[role="radiogroup"] > label:hover {
+
+div[data-testid="stRadio"] div[role="radiogroup"] label:hover p {
   color: var(--neon-cyan) !important;
 }
-div[data-testid="stRadio"] div[role="radiogroup"] input:checked + div {
-  background-color: var(--neon-cyan) !important;
-  border-color: var(--neon-cyan) !important;
-  box-shadow: 0 0 10px var(--neon-cyan);
+
+/* The Radio Outer Circle */
+div[data-testid="stRadio"] div[role="radiogroup"] label > div:first-child {
+  background: rgba(10, 17, 24, 0.9) !important;
+  border: 1px solid rgba(25, 243, 255, 0.4) !important;
+  border-radius: 50% !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease !important;
 }
 
-/* Checkboxes (BUG FIX: Plain text label, NO highlight background box) */
-div[data-testid="stCheckbox"] label {
+/* Selected state: glowing cyan ring + cyan dot */
+div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) > div:first-child {
+  border-color: #19F3FF !important;
+  box-shadow: 0 0 10px #19F3FF !important;
+}
+
+div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) > div:first-child > div,
+div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) > div:first-child span,
+div[data-testid="stRadio"] div[role="radiogroup"] label:has(input:checked) > div:first-child svg {
+  background-color: #19F3FF !important;
+  border-color: #19F3FF !important;
+  fill: #19F3FF !important;
+  box-shadow: 0 0 8px #19F3FF !important;
+}
+
+/* --------------------------------------------------------------------------
+   P0: CHECKBOXES (CLEAN LABEL, CYAN CHECKBOX, NO RED BORDER, NO FLASH)
+   -------------------------------------------------------------------------- */
+div[data-testid="stCheckbox"],
+div[data-testid="stCheckbox"] label,
+div[data-testid="stCheckbox"] label:hover,
+div[data-testid="stCheckbox"] label:focus,
+div[data-testid="stCheckbox"] label:active,
+div[data-testid="stCheckbox"] label:focus-within {
   background: transparent !important;
   background-color: transparent !important;
   box-shadow: none !important;
   color: var(--text-primary) !important;
-  font-family: 'Rajdhani', sans-serif !important;
-  font-weight: 600 !important;
+  cursor: pointer !important;
 }
-div[data-testid="stCheckbox"] label * {
+
+div[data-testid="stCheckbox"] label *,
+div[data-testid="stCheckbox"] label div,
+div[data-testid="stCheckbox"] label span,
+div[data-testid="stCheckbox"] label p {
   background: transparent !important;
   background-color: transparent !important;
   box-shadow: none !important;
 }
+
 div[data-testid="stCheckbox"] label p,
 div[data-testid="stCheckbox"] label span {
   color: var(--text-primary) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  transition: color 150ms ease !important;
+}
+
+div[data-testid="stCheckbox"] label:hover p,
+div[data-testid="stCheckbox"] label:hover span {
+  color: var(--neon-cyan) !important;
+}
+
+/* Unchecked Checkbox Square - Cyan outline, dark body, absolutely NO red */
+div[data-testid="stCheckbox"] input + span,
+div[data-testid="stCheckbox"] [data-baseweb="checkbox"] > span,
+div[data-testid="stCheckbox"] [data-baseweb="checkbox"] > span:first-of-type {
+  border: 1px solid rgba(25, 243, 255, 0.5) !important;
+  border-color: rgba(25, 243, 255, 0.5) !important;
+  background-color: rgba(10, 17, 24, 0.9) !important;
+  background: rgba(10, 17, 24, 0.9) !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  transition: border-color 150ms ease, box-shadow 150ms ease !important;
+}
+
+/* Checkbox Hover */
+div[data-testid="stCheckbox"]:hover input + span,
+div[data-testid="stCheckbox"]:hover [data-baseweb="checkbox"] > span {
+  border-color: #19F3FF !important;
+  box-shadow: 0 0 8px rgba(25, 243, 255, 0.4) !important;
+}
+
+/* Keyboard focus: thin cyan outline on the box only */
+div[data-testid="stCheckbox"] input:focus-visible + span,
+div[data-testid="stCheckbox"] input:focus + span {
+  outline: 2px solid #19F3FF !important;
+  outline-offset: 2px !important;
+  border-color: #19F3FF !important;
+}
+
+/* Checked Checkbox Square - Solid cyan with glowing aura (STRICTLY ON SPAN, NOT DIV) */
+div[data-testid="stCheckbox"] input:checked + span,
+div[data-testid="stCheckbox"] [data-baseweb="checkbox"]:has(input:checked) > span {
+  background-color: #19F3FF !important;
+  background: #19F3FF !important;
+  border-color: #19F3FF !important;
+  box-shadow: 0 0 10px #19F3FF !important;
+}
+
+/* Checkmark SVG inside the box */
+div[data-testid="stCheckbox"] input:checked + span svg,
+div[data-testid="stCheckbox"] [data-baseweb="checkbox"] svg,
+div[data-testid="stCheckbox"] [data-baseweb="checkbox"] svg path {
+  stroke: #03060A !important;
+  fill: #03060A !important;
+  color: #03060A !important;
+}
+
+/* The label container div MUST STAY TRANSPARENT in ALL states */
+div[data-testid="stCheckbox"] [data-baseweb="checkbox"] > div,
+div[data-testid="stCheckbox"] input:checked ~ div,
+div[data-testid="stCheckbox"] [data-baseweb="checkbox"]:hover > div,
+div[data-testid="stCheckbox"] [data-baseweb="checkbox"]:active > div {
   background: transparent !important;
   background-color: transparent !important;
   box-shadow: none !important;
-}
-div[data-testid="stCheckbox"] input:checked + div {
-  background-color: var(--neon-cyan) !important;
-  border-color: var(--neon-cyan) !important;
-  box-shadow: 0 0 8px var(--neon-cyan) !important;
+  border: none !important;
 }
 
-/* Dropdown / Selectbox */
+/* --------------------------------------------------------------------------
+   DROPDOWNS / SELECTBOXES
+   -------------------------------------------------------------------------- */
 div[data-baseweb="select"] > div {
   background-color: var(--bg-gunmetal-2) !important;
   border: var(--border-tactical) !important;
@@ -500,7 +700,9 @@ li[role="option"]:hover, li[aria-selected="true"] {
   color: var(--neon-cyan) !important;
 }
 
-/* Number inputs */
+/* --------------------------------------------------------------------------
+   NUMBER INPUTS
+   -------------------------------------------------------------------------- */
 div[data-testid="stNumberInput"] input {
   background-color: var(--bg-gunmetal-2) !important;
   border: var(--border-tactical) !important;
@@ -514,7 +716,9 @@ div[data-testid="stNumberInput"] button {
   color: var(--neon-cyan) !important;
 }
 
-/* Buttons: Neon sweep & Tactical Press */
+/* --------------------------------------------------------------------------
+   BUTTONS
+   -------------------------------------------------------------------------- */
 div.stButton > button {
   background: linear-gradient(135deg, rgba(25, 243, 255, 0.15) 0%, rgba(10, 17, 24, 0.9) 100%) !important;
   border: 1px solid var(--neon-cyan) !important;
@@ -539,7 +743,9 @@ div.stButton > button:active {
   transform: translateY(1px);
 }
 
-/* Tabs: Horizontal Scroll & No Clipping (BUG FIX) */
+/* --------------------------------------------------------------------------
+   TABS: HORIZONTAL SCROLL & NO CLIPPING
+   -------------------------------------------------------------------------- */
 div[data-baseweb="tab-list"] {
   display: flex !important;
   flex-wrap: nowrap !important;
@@ -577,7 +783,9 @@ button[data-baseweb="tab"][aria-selected="true"] {
   border-bottom: 2px solid var(--neon-cyan) !important;
 }
 
-/* Expanders */
+/* --------------------------------------------------------------------------
+   EXPANDERS, DATAFRAMES, ALERTS & TOOLTIPS
+   -------------------------------------------------------------------------- */
 div[data-testid="stExpander"] {
   background: var(--bg-gunmetal-1) !important;
   border: var(--border-tactical) !important;
@@ -592,14 +800,12 @@ div[data-testid="stExpander"] summary {
   letter-spacing: 0.5px;
 }
 
-/* Tables & Dataframes */
 div[data-testid="stDataFrame"] {
   border: var(--border-tactical) !important;
   border-radius: 8px !important;
   background: var(--bg-gunmetal-1) !important;
 }
 
-/* Info & Warning callouts */
 div[data-testid="stAlert"] {
   background: rgba(10, 17, 24, 0.95) !important;
   border: 1px solid rgba(25, 243, 255, 0.4) !important;
@@ -608,7 +814,64 @@ div[data-testid="stAlert"] {
   box-shadow: 0 0 15px rgba(25, 243, 255, 0.15);
 }
 
-/* Tooltips */
 div[data-testid="stTooltipIcon"] svg {
   fill: var(--neon-cyan) !important;
+}
+
+/* ==========================================================================
+   TACTICAL SATELLITE MAP (NASA GIBS INTEGRATION)
+   ========================================================================== */
+
+/* Subtle dark-teal tint to the satellite tile layer */
+div[data-testid="stPlotlyChart"] .mapboxgl-canvas,
+div[data-testid="stPlotlyChart"] canvas {
+  filter: brightness(0.86) contrast(1.15) saturate(0.92) !important;
+}
+
+/* Map frame & Chamfered styling */
+div[data-testid="stPlotlyChart"]:has(.mapboxgl-map) {
+  border: var(--border-tactical) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.8), inset 0 0 15px rgba(25, 243, 255, 0.05) !important;
+  overflow: hidden !important;
+  background-color: var(--bg-gunmetal-1) !important;
+}
+
+/* Mapbox GL Navigation controls (Zoom buttons) */
+.mapboxgl-ctrl-group {
+  background: rgba(10, 17, 24, 0.9) !important;
+  border: 1px solid rgba(25, 243, 255, 0.4) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 10px rgba(0,0,0,0.7) !important;
+}
+
+.mapboxgl-ctrl-group button {
+  background-color: transparent !important;
+  border-bottom: 1px solid rgba(25, 243, 255, 0.2) !important;
+}
+
+.mapboxgl-ctrl-group button:hover {
+  background-color: rgba(25, 243, 255, 0.15) !important;
+}
+
+.mapboxgl-ctrl-icon {
+  filter: invert(1) drop-shadow(0 0 2px #19F3FF) !important;
+}
+
+/* Mapbox Attribution Box */
+.mapboxgl-ctrl-attrib {
+  background: rgba(7, 13, 20, 0.85) !important;
+  color: #8FA6B8 !important;
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 10px !important;
+  border-top-left-radius: 4px !important;
+  border: 1px solid rgba(25, 243, 255, 0.25) !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  padding: 2px 6px !important;
+}
+
+.mapboxgl-ctrl-attrib a {
+  color: #19F3FF !important;
+  text-decoration: none !important;
 }

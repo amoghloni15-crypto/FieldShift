@@ -7,3 +7,6 @@ chickpea,Chickpea (Garbanzo),Fabaceae,Spring/Winter,320,Moderate,High,0.8,Yes,Mo
 alfalfa,Alfalfa (Lucerne),Fabaceae,Perennial,750,Moderate,Moderate,2.5,Yes,High,6.5,7.8,Low,Deep taproot mining subsoil nutrients; high N credit,FAO Irrigation & Drainage Paper 56
 sunflower,Sunflower,Asteraceae,Summer,480,High,Moderate,1.8,No,High,6.0,7.5,Moderate,Strong taproot breaks plow pan; broadleaf non-cereal,FAO EcoCrop
 clover_rye,Cover Crop (Clover-Rye),Fabaceae/Poaceae,Fall/Winter,220,Moderate,Moderate,0.6,Yes,High,5.5,7.5,Low,Soil armour; minimizes erosion; biomass addition,FAO Soil Bulletin 80
+finger_millet,Finger Millet (Ragi),Poaceae,Summer/Kharif,350,High,High,0.9,No,High,5.5,7.5,Low,Nutrient-dense C4 climate-hardy millet; rich in calcium and dietary fiber,FAO EcoCrop
+pigeon_pea,Pigeon Pea (Tur / Arhar),Fabaceae,Summer/Kharif,420,High,High,1.8,Yes,High,6.0,7.8,Moderate,Deep-rooting pulse breaking plow pans; biological N-fixation ~60-90 kg N/ha,FAO EcoCrop & ICRISAT
+groundnut,Groundnut (Peanut),Fabaceae,Summer/Kharif,450,Moderate,Moderate,0.8,Yes,Moderate,5.8,7.2,Moderate,Major oilseed legume; fixes atmospheric nitrogen; requires friable soil,FAO Irrigation & Drainage Paper 56

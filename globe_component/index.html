@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/globe.gl@2.46.2/dist/globe.gl.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    html, body {
+      background: transparent;
+      color: #19F3FF;
+      font-family: 'Rajdhani', -apple-system, sans-serif;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      min-height: 600px;
+    }
+    #cockpit-window {
+      position: relative;
+      width: 100%;
+      height: 600px;
+      background: radial-gradient(circle at center, rgba(16, 26, 36, 0.4) 0%, rgba(3, 6, 10, 0.95) 100%);
+      border-radius: 14px;
+      border: 1px solid rgba(25, 243, 255, 0.4);
+      box-shadow: 
+        inset 0 0 50px rgba(0, 0, 0, 0.95),
+        0 0 30px rgba(25, 243, 255, 0.15),
+        0 16px 40px rgba(0,0,0,0.8);
+      overflow: hidden;
+    }
+
+    .rivet {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: radial-gradient(circle at 35% 35%, #94a3b8, #1e293b);
+      border-radius: 50%;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.9), inset 0 1px 1px rgba(255,255,255,0.4);
+      z-index: 25;
+    }
+    .rivet-tl { top: 10px; left: 10px; }
+    .rivet-tr { top: 10px; right: 10px; }
+    .rivet-bl { bottom: 10px; left: 10px; }
+    .rivet-br { bottom: 10px; right: 10px; }
+
+    .bracket {
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      pointer-events: none;
+      z-index: 22;
+    }
+    .bracket-tl { top: 16px; left: 16px; border-top: 2px solid #19F3FF; border-left: 2px solid #19F3FF; }
+    .bracket-tr { top: 16px; right: 16px; border-top: 2px solid #19F3FF; border-right: 2px solid #19F3FF; }
+    .bracket-bl { bottom: 16px; left: 16px; border-bottom: 2px solid #19F3FF; border-left: 2px solid #19F3FF; }
+    .bracket-br { bottom: 16px; right: 16px; border-bottom: 2px solid #19F3FF; border-right: 2px solid #19F3FF; }
+
+    /* Center Crosshair Aiming Sight */
+    .crosshair-sight {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px; height: 48px;
+      pointer-events: none;
+      z-index: 22;
+    }
+    .crosshair-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 28px; height: 28px;
+      border: 1px dashed rgba(255, 158, 31, 0.75);
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(255, 158, 31, 0.4);
+      animation: spinCrosshair 12s linear infinite;
+    }
+    @keyframes spinCrosshair {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    .crosshair-sight::before {
+      content: '';
+      position: absolute;
+      top: 23px; left: 0; width: 48px; height: 1px;
+      background: linear-gradient(90deg, rgba(25,243,255,0.2), #19F3FF, rgba(255,158,31,0.9), #19F3FF, rgba(25,243,255,0.2));
+    }
+    .crosshair-sight::after {
+      content: '';
+      position: absolute;
+      left: 23px; top: 0; width: 1px; height: 48px;
+      background: linear-gradient(180deg, rgba(25,243,255,0.2), #19F3FF, rgba(255,158,31,0.9), #19F3FF, rgba(25,243,255,0.2));
+    }
+    .crosshair-dot {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 4px; height: 4px;
+      background: #FF9E1F;
+      border-radius: 50%;
+      box-shadow: 0 0 6px #FF9E1F;
+    }
+
+    .glass-glare {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.005) 30%, transparent 60%);
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    #globeViz {
+      width: 100%;
+      height: 600px;
+      position: absolute;
+      top: 0; left: 0;
+      z-index: 1;
+      cursor: grab;
+    }
+    #globeViz:active {
+      cursor: grabbing;
+    }
+    #globeViz canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .hud-top {
+      position: absolute;
+      top: 14px;
+      left: 22px;
+      right: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 22;
+      pointer-events: none;
+    }
+    .hud-badge {
+      background: rgba(10, 17, 24, 0.88);
+      border: 1px solid rgba(25, 243, 255, 0.5);
+      padding: 5px 14px;
+      border-radius: 4px;
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: #19F3FF;
+      text-shadow: 0 0 8px rgba(25, 243, 255, 0.7);
+      backdrop-filter: blur(6px);
+    }
+    .hud-clock-box {
+      background: rgba(10, 17, 24, 0.88);
+      border: 1px solid rgba(255, 158, 31, 0.5);
+      padding: 5px 14px;
+      border-radius: 4px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      color: #FF9E1F;
+      text-shadow: 0 0 8px rgba(255, 158, 31, 0.6);
+      backdrop-filter: blur(6px);
+    }
+
+    .hud-bottom {
+      position: absolute;
+      bottom: 14px;
+      left: 22px;
+      right: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      z-index: 22;
+      pointer-events: none;
+    }
+    .telemetry-card {
+      background: rgba(10, 17, 24, 0.92);
+      border: 1px solid rgba(25, 243, 255, 0.4);
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    }
+    .telemetry-title {
+      color: #8FA6B8;
+      font-size: 9px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+    .telemetry-val {
+      color: #FFFFFF;
+      font-weight: 700;
+    }
+
+    .cockpit-controls {
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
+    .hud-btn {
+      background: rgba(10, 17, 24, 0.92);
+      border: 1px solid rgba(25, 243, 255, 0.5);
+      color: #19F3FF;
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 8px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(6px);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .hud-btn:hover {
+      background: #19F3FF;
+      color: #03060A;
+      box-shadow: 0 0 15px #19F3FF;
+      transform: translateY(-2px);
+    }
+    .hud-btn:active {
+      transform: translateY(1px);
+    }
+    .hud-btn-lock {
+      border-color: #FF9E1F !important;
+      color: #FF9E1F !important;
+      box-shadow: 0 0 8px rgba(255, 158, 31, 0.25);
+    }
+    .hud-btn-lock:hover {
+      background: #FF9E1F !important;
+      color: #03060A !important;
+      box-shadow: 0 0 18px #FF9E1F !important;
+    }
+
+    .reticle-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform: translate(-50%, -100%);
+      pointer-events: none;
+    }
+    .reticle-label {
+      background: rgba(10, 17, 24, 0.92);
+      border: 1px solid #FF9E1F;
+      color: #FF9E1F;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      box-shadow: 0 0 12px rgba(255, 158, 31, 0.5);
+      margin-bottom: 4px;
+    }
+    .reticle-pin {
+      width: 12px;
+      height: 12px;
+      background: #FF9E1F;
+      border: 2px solid #FFFFFF;
+      border-radius: 50%;
+      box-shadow: 0 0 12px #FF9E1F;
+    }
+    .reticle-stem {
+      width: 2px;
+      height: 14px;
+      background: #FF9E1F;
+    }
+
+    /* Fallback planet view */
+    #fallback-card {
+      display: none;
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle at 50% 50%, #0d1b2a 0%, #03060a 85%);
+      z-index: 10;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: #19F3FF;
+    }
+    .fallback-planet {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #1e3a5f 0%, #0b1d33 70%, #030811 100%);
+      box-shadow: 
+        inset -20px -20px 40px rgba(0, 0, 0, 0.9),
+        0 0 45px rgba(25, 243, 255, 0.4),
+        0 0 90px rgba(25, 243, 255, 0.15);
+      position: relative;
+      margin-bottom: 16px;
+      border: 1px solid rgba(25, 243, 255, 0.3);
+    }
+    .fallback-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 280px; height: 70px;
+      border: 2px solid rgba(25, 243, 255, 0.25);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) rotate(-25deg);
+      box-shadow: 0 0 15px rgba(25, 243, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div id="cockpit-window">
+    <div class="rivet rivet-tl"></div>
+    <div class="rivet rivet-tr"></div>
+    <div class="rivet rivet-bl"></div>
+    <div class="rivet rivet-br"></div>
+    <div class="glass-glare"></div>
+
+    <div class="bracket bracket-tl"></div>
+    <div class="bracket bracket-tr"></div>
+    <div class="bracket bracket-bl"></div>
+    <div class="bracket bracket-br"></div>
+    
+    <!-- Optical Aiming Sight -->
+    <div class="crosshair-sight">
+      <div class="crosshair-ring"></div>
+      <div class="crosshair-dot"></div>
+    </div>
+
+    <div class="hud-top">
+      <div class="hud-badge">🛰️ HOLOGRAPHIC RECON // GLOBAL TARGETING ACTIVE</div>
+      <div class="hud-clock-box">MISSION TIME: <span id="hud-clock">00:00:00</span></div>
+    </div>
+
+    <div id="globeViz"></div>
+
+    <!-- Safety Fallback Planet -->
+    <div id="fallback-card">
+      <div class="fallback-planet">
+        <div class="fallback-ring"></div>
+      </div>
+      <div style="font-size: 15px; font-weight: 800; font-family: 'Orbitron'; color: #19F3FF; letter-spacing: 1.5px;">GLOBE RENDER FALLBACK // SENSORS ONLINE</div>
+      <div style="font-size: 12px; color: #8FA6B8; font-family: 'Share Tech Mono'; margin-top: 6px;" id="fallback-target">TARGET COORDINATES ACQUIRED</div>
+    </div>
+
+    <div class="hud-bottom">
+      <div class="telemetry-card">
+        <div class="telemetry-title">TARGET LOCATION SENSOR</div>
+        <div>TARGET: <span class="telemetry-val" id="target-latlon" style="color: #FF9E1F;">--</span> | <span id="target-name" style="color: #8FA6B8;">--</span></div>
+        <div class="telemetry-title" style="margin-top: 4px;">AIM RETICLE // CENTER CROSSHAIR (REAL-TIME)</div>
+        <div>CROSSHAIR: <span class="telemetry-val" id="crosshair-latlon" style="color:#19F3FF;">--</span> | ALT: <span class="telemetry-val" id="cam-alt">--</span> | <span class="telemetry-val" id="lock-status" style="color:#2CFFB0;">ACQUIRED</span></div>
+      </div>
+
+      <div class="cockpit-controls">
+        <button class="hud-btn hud-btn-lock" id="btn-lock" title="Lock the coordinates currently under the center crosshair">🎯 LOCK TARGET</button>
+        <button class="hud-btn" id="btn-field" title="Fly camera to selected target">📍 FIELD VIEW</button>
+        <button class="hud-btn" id="btn-orbit" title="Zoom out to whole planetary orbit">🛰️ ORBIT VIEW</button>
+        <button class="hud-btn" id="btn-mode">🌙 NIGHT VIS</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Streamlit Component Protocol Helper
+    function sendToStreamlit(type, data) {
+      window.parent.postMessage({
+        isStreamlitMessage: true,
+        type: type,
+        ...data
+      }, "*");
+    }
+
+    // Tell Streamlit the component is loaded and request 620px frame height
+    sendToStreamlit("streamlit:componentReady", { apiVersion: 1 });
+    sendToStreamlit("streamlit:setFrameHeight", { height: 620 });
+
+    // Mission Elapsed Clock
+    const startTime = Date.now();
+    setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+      const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+      const s = String(elapsed % 60).padStart(2, '0');
+      document.getElementById('hud-clock').innerText = `${h}:${m}:${s}`;
+    }, 1000);
+
+    const dayTexture = 'https://cdn.jsdelivr.net/npm/three-globe@2.35.0/example/img/earth-blue-marble.jpg';
+    const bumpTexture = 'https://cdn.jsdelivr.net/npm/three-globe@2.35.0/example/img/earth-topology.png';
+    const nightTexture = 'https://cdn.jsdelivr.net/npm/three-globe@2.35.0/example/img/earth-night.jpg';
+    const skyTexture = 'https://cdn.jsdelivr.net/npm/three-globe@2.35.0/example/img/night-sky.png';
+
+    let world = null;
+    let currentTargetLat = 33.5779;
+    let currentTargetLon = -101.8552;
+    let currentTargetLabel = "Lubbock, Texas, USA";
+    let isInitialized = false;
+    let hasFlownInitial = false;
+
+    function isWebGLAvailable() {
+      try {
+        const canvas = document.createElement('canvas');
+        return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function resizeGlobe() {
+      if (!world) return;
+      const globeContainer = document.getElementById('globeViz');
+      if (!globeContainer) return;
+      const w = globeContainer.clientWidth || window.innerWidth || 800;
+      const h = globeContainer.clientHeight || 600;
+      if (w > 50 && h > 50) {
+        world.width(w);
+        world.height(h);
+      }
+    }
+
+    function initGlobe() {
+      if (isInitialized) return;
+
+      if (!isWebGLAvailable() || typeof Globe === 'undefined') {
+        console.warn("WebGL or Globe.gl not available, triggering fallback.");
+        document.getElementById('fallback-card').style.display = 'flex';
+        return;
+      }
+
+      try {
+        const globeContainer = document.getElementById('globeViz');
+        const containerW = Math.max(300, globeContainer.clientWidth || window.innerWidth || 800);
+        const containerH = Math.max(300, globeContainer.clientHeight || 600);
+
+        const ringsData = [
+          { lat: currentTargetLat, lng: currentTargetLon, maxR: 4.8, propagationSpeed: 2.2, repeatPeriod: 1200, color: '#FF9E1F' },
+          { lat: currentTargetLat, lng: currentTargetLon, maxR: 2.2, propagationSpeed: 1.6, repeatPeriod: 800, color: '#19F3FF' }
+        ];
+        
+        const htmlMarkers = [
+          { lat: currentTargetLat, lng: currentTargetLon, name: currentTargetLabel }
+        ];
+
+        world = Globe()(globeContainer)
+          .width(containerW)
+          .height(containerH)
+          .globeImageUrl(dayTexture)
+          .bumpImageUrl(bumpTexture)
+          .backgroundImageUrl(skyTexture)
+          .showAtmosphere(true)
+          .atmosphereColor('#19F3FF')
+          .atmosphereAltitude(0.24)
+          .ringsData(ringsData)
+          .ringColor(d => d.color)
+          .ringMaxRadius('maxR')
+          .ringPropagationSpeed('propagationSpeed')
+          .ringRepeatPeriod('repeatPeriod')
+          .htmlElementsData(htmlMarkers)
+          .htmlElement(d => {
+            const el = document.createElement('div');
+            el.className = 'reticle-container';
+            el.innerHTML = `
+              <div class="reticle-label">🎯 ${d.name}</div>
+              <div class="reticle-pin"></div>
+              <div class="reticle-stem"></div>
+            `;
+            return el;
+          });
+
+        if (world.renderer()) {
+          world.renderer().setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        }
+
+        const controls = world.controls();
+        controls.autoRotate = false;
+        controls.autoRotateSpeed = 0.25;
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+
+        // Auto-pause autoRotate on interaction
+        let idleTimer = null;
+        function onUserInteract() {
+          controls.autoRotate = false;
+          if (idleTimer) clearTimeout(idleTimer);
+          idleTimer = setTimeout(() => {
+            const pov = world.pointOfView();
+            if (pov && pov.altitude > 2.2) {
+              controls.autoRotate = true;
+            }
+          }, 6000);
+        }
+        globeContainer.addEventListener('pointerdown', onUserInteract);
+        globeContainer.addEventListener('wheel', onUserInteract, { passive: true });
+
+        // Telemetry RAF Loop
+        let lastUpdate = 0;
+        function updateTelemetry(time) {
+          if (time - lastUpdate > 80) {
+            lastUpdate = time;
+            const pov = world.pointOfView();
+            if (pov) {
+              const cLat = (pov.lat >= 0 ? '+' : '') + pov.lat.toFixed(2) + '°';
+              const cLon = (pov.lng >= 0 ? '+' : '') + pov.lng.toFixed(2) + '°';
+              const kmAlt = Math.round(pov.altitude * 6371);
+              document.getElementById('crosshair-latlon').innerText = `${cLat}, ${cLon}`;
+              document.getElementById('cam-alt').innerText = `${kmAlt.toLocaleString()} KM (${pov.altitude.toFixed(2)} R)`;
+            }
+          }
+          requestAnimationFrame(updateTelemetry);
+        }
+        requestAnimationFrame(updateTelemetry);
+
+        // Viewport Buttons
+        document.getElementById('btn-field').addEventListener('click', () => {
+          controls.autoRotate = false;
+          world.pointOfView({ lat: currentTargetLat, lng: currentTargetLon, altitude: 0.95 }, 1400);
+          setTimeout(() => {
+            world.pointOfView({ lat: currentTargetLat, lng: currentTargetLon, altitude: 0.95 }, 0);
+          }, 1450);
+        });
+
+        document.getElementById('btn-orbit').addEventListener('click', () => {
+          controls.autoRotate = false;
+          world.pointOfView({ altitude: 3.4 }, 1600);
+        });
+
+        let isNight = false;
+        document.getElementById('btn-mode').addEventListener('click', () => {
+          isNight = !isNight;
+          world.globeImageUrl(isNight ? nightTexture : dayTexture);
+          document.getElementById('btn-mode').innerText = isNight ? '☀️ DAY VIS' : '🌙 NIGHT VIS';
+        });
+
+        // LOCK TARGET BUTTON
+        document.getElementById('btn-lock').addEventListener('click', () => {
+          const pov = world.pointOfView();
+          if (pov) {
+            const lockedLat = Number(pov.lat.toFixed(4));
+            const lockedLon = Number(pov.lng.toFixed(4));
+
+            // Visual feedback
+            const statusEl = document.getElementById('lock-status');
+            statusEl.innerText = `LOCKED (${lockedLat >= 0 ? '+' : ''}${lockedLat.toFixed(2)}°, ${lockedLon >= 0 ? '+' : ''}${lockedLon.toFixed(2)}°)`;
+            statusEl.style.color = '#FF9E1F';
+
+            const btnLock = document.getElementById('btn-lock');
+            btnLock.style.background = '#FF9E1F';
+            btnLock.style.color = '#03060A';
+            setTimeout(() => {
+              btnLock.style.background = '';
+              btnLock.style.color = '#FF9E1F';
+            }, 600);
+
+            sendToStreamlit("streamlit:setComponentValue", {
+              value: {
+                lat: lockedLat,
+                lon: lockedLon,
+                id: Date.now()
+              }
+            });
+          }
+        });
+
+        // Robust ResizeObserver for automatic sizing
+        const resizeObserver = new ResizeObserver(() => {
+          resizeGlobe();
+        });
+        resizeObserver.observe(globeContainer);
+        window.addEventListener('resize', resizeGlobe);
+
+        // Immediate layout calibration passes
+        setTimeout(resizeGlobe, 50);
+        setTimeout(resizeGlobe, 250);
+        setTimeout(resizeGlobe, 800);
+
+        isInitialized = true;
+      } catch (err) {
+        console.error("Failed to initialize globe:", err);
+        document.getElementById('fallback-card').style.display = 'flex';
+      }
+    }
+
+    // Render handler for incoming Streamlit args
+    function handleRenderArgs(args) {
+      if (!isInitialized) {
+        initGlobe();
+      }
+      if (!world) return;
+
+      const targetLat = typeof args.target_lat === 'number' ? args.target_lat : currentTargetLat;
+      const targetLon = typeof args.target_lon === 'number' ? args.target_lon : currentTargetLon;
+      const targetLabel = args.target_label || currentTargetLabel;
+      const isFirstLoad = !!args.is_first_load;
+
+      const latChanged = Math.abs(targetLat - currentTargetLat) > 0.001;
+      const lonChanged = Math.abs(targetLon - currentTargetLon) > 0.001;
+
+      currentTargetLat = targetLat;
+      currentTargetLon = targetLon;
+      currentTargetLabel = targetLabel;
+
+      // Update HUD telemetry
+      const latFmt = (targetLat >= 0 ? '+' : '') + targetLat.toFixed(2) + '°';
+      const lonFmt = (targetLon >= 0 ? '+' : '') + targetLon.toFixed(2) + '°';
+      document.getElementById('target-latlon').innerText = `${latFmt}, ${lonFmt}`;
+      document.getElementById('target-name').innerText = targetLabel;
+      document.getElementById('fallback-target').innerText = `TARGET: ${targetLabel} (${latFmt}, ${lonFmt})`;
+
+      // Update Marker and Rings
+      const ringsData = [
+        { lat: targetLat, lng: targetLon, maxR: 4.8, propagationSpeed: 2.2, repeatPeriod: 1200, color: '#FF9E1F' },
+        { lat: targetLat, lng: targetLon, maxR: 2.2, propagationSpeed: 1.6, repeatPeriod: 800, color: '#19F3FF' }
+      ];
+      const htmlMarkers = [
+        { lat: targetLat, lng: targetLon, name: targetLabel }
+      ];
+
+      world.ringsData(ringsData);
+      world.htmlElementsData(htmlMarkers);
+
+      // Re-trigger layout measurement in case container expanded
+      resizeGlobe();
+
+      const controls = world.controls();
+      controls.autoRotate = false;
+
+      // Fly camera only on first load or when target coordinates change
+      if (isFirstLoad && !hasFlownInitial) {
+        hasFlownInitial = true;
+        world.pointOfView({ lat: targetLat, lng: targetLon, altitude: 3.8 }, 0);
+        setTimeout(() => {
+          world.pointOfView({ lat: targetLat, lng: targetLon, altitude: 1.15 }, 2400);
+          setTimeout(() => {
+            world.pointOfView({ lat: targetLat, lng: targetLon, altitude: 1.15 }, 0);
+            document.getElementById('lock-status').innerText = 'TARGET ACQUIRED';
+            document.getElementById('lock-status').style.color = '#2CFFB0';
+          }, 2450);
+        }, 100);
+      } else if (latChanged || lonChanged) {
+        document.getElementById('lock-status').innerText = 'ACQUIRING...';
+        document.getElementById('lock-status').style.color = '#FF9E1F';
+        world.pointOfView({ lat: targetLat, lng: targetLon, altitude: 1.15 }, 1800);
+        setTimeout(() => {
+          world.pointOfView({ lat: targetLat, lng: targetLon, altitude: 1.15 }, 0);
+          document.getElementById('lock-status').innerText = 'TARGET ACQUIRED';
+          document.getElementById('lock-status').style.color = '#2CFFB0';
+        }, 1850);
+      }
+    }
+
+    // Listen for Streamlit render messages
+    window.addEventListener("message", (event) => {
+      if (event.data && event.data.type === "streamlit:render") {
+        handleRenderArgs(event.data.args || {});
+      }
+    });
+
+    // Auto-init on load if running stand-alone
+    window.addEventListener("DOMContentLoaded", () => {
+      initGlobe();
+    });
+
+    // Safety net: after 3.8s, verify canvas is actually rendered and sized
+    setTimeout(() => {
+      const canvas = document.querySelector('#globeViz canvas');
+      if (!canvas || canvas.clientWidth < 50 || canvas.clientHeight < 50) {
+        console.warn("Globe canvas failed to render within 3.8s; showing safety fallback.");
+        document.getElementById('fallback-card').style.display = 'flex';
+      }
+    }, 3800);
+  </script>
+</body>
+</html>

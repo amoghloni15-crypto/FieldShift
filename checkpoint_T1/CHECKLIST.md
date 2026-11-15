@@ -1,0 +1,36 @@
+# FIELDSHIFT UPGRADE CHECKLIST (NASA Space Apps 2026)
+
+## Progress Overview
+- [x] Initial Project Safety Backup (`backup_pre_upgrade/`)
+- [x] **Tier 1: Foundation, Methodology & Farm Reports** (VERIFIED & COMPLETED)
+  - [x] Multi-Page Architecture (`st.navigation` / `st.Page` with shared HUD layout)
+  - [x] Shared Session State Bridge & Non-Widget Key Persistence
+  - [x] Data Provenance Chips (`LIVE API`, `DERIVED`, `MODELED`, `FARMER INPUT`, `APPROXIMATE TABLE`, `FALLBACK DEMO`)
+  - [x] Page 1: Mission Control (Hero 3D Earth Cockpit, Lightsaber Sliders, Agro Intel, GIBS Map)
+  - [x] Page 5: Farm Report (PDF Export via ReportLab, CSV, JSON, Soil Sampling Planner)
+  - [x] Page 6: Scientific Methodology & Provenance Registry (Full metadata, formula disclosures, worked example)
+  - [x] Checkpoint T1 (`checkpoint_T1/`) & Browser Verification
+- [ ] **Tier 2: Climate Scenario Simulator**
+  - [ ] Controls: Temperature anomaly, Rainfall scale, Irrigation availability, Monsoon/rain shift
+  - [ ] Presets: Baseline, Reduced rainfall, Extreme rainfall, Heat stress, Delayed rains, Reduced irrigation, Hypothetical 2040
+  - [ ] Dynamic series transformation & Hargreaves-Samani ET0 water balance
+  - [ ] Resilience comparison side-by-side rescoring against current practice
+  - [ ] Checkpoint T2 (`checkpoint_T2/`) & Browser Verification
+- [ ] **Tier 3: 3D Farm Digital Twin**
+  - [ ] Three.js WebGL component (InstancedMesh crop rows, dynamic terrain, sky, lighting)
+  - [ ] Data-driven link to selected farm rotation, crops.csv rooting depths, and soil texture
+  - [ ] Controls: Orbit camera presets, 4-season selector, 6-stage growth slider, soil cutaway toggle
+  - [ ] Provenance badges & WebGL fallback card
+  - [ ] Checkpoint T3 (`checkpoint_T3/`) & Browser Verification
+- [ ] **Tier 4: AI Agronomist (Gemini)**
+  - [ ] Official Google GenAI SDK integration via `st.secrets["GEMINI_API_KEY"]` / env var
+  - [ ] Grounded system prompt with strict context payload (no hallucinated yields)
+  - [ ] Tactical chat UI with question chips, language selector, technical mode toggle
+  - [ ] Deterministic rule-based fallback explainer when offline / without API key
+  - [ ] Checkpoint T4 (`checkpoint_T4/`) & Browser Verification
+- [ ] **Tier 5: Platform Extras**
+  - [ ] NASA GIBS Layer Manager (MODIS NDVI, True Color, GPM Precipitation, SMAP Soil Moisture)
+  - [ ] Indian regional crops (Finger Millet/Ragi, Pigeon Pea/Tur, Groundnut) & Karnataka presets
+  - [ ] Interactive farm boundary polygon drawing tool (GeoJSON centroid & acre calculation)
+  - [ ] Guided Mission Walkthrough Mode
+  - [ ] Final Package & Pitch Deck

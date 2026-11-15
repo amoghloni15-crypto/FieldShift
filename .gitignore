@@ -1,16 +1,26 @@
-# Python
-__pycache__/
+﻿__pycache__/
 *.py[cod]
-*$py.class
-*.env
+.pytest_cache/
+.mypy_cache/
+
+venv/
 .venv/
 env/
-venv/
-ENV/
 
-# Streamlit
-.streamlit/
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
 
-# OS
+*.db
+*.sqlite
+*.sqlite3
+
+.vscode/
+.idea/
 .DS_Store
 Thumbs.db
+
+dist/
+build/
+*.egg-info/

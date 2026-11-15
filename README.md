@@ -1,56 +1,72 @@
-# 🌾 FieldShift Rotation Advisor
+# 🌾 FieldShift: Planetary Farm Adaptation Platform
 
-**Adapting Farms with NASA Earth Observations & Local Soil Intelligence**  
-*Developed for the NASA International Space Apps Challenge 2026*  
+**Adapting Agriculture with NASA Earth Observations & Local Soil Intelligence**  
+*Built for the NASA International Space Apps Challenge 2026*  
 **Challenge:** *Field Shift: Adapting Farms with NASA Data*
 
 [![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.37+-red.svg)](https://streamlit.io/)
 [![NASA POWER](https://img.shields.io/badge/NASA%20Data-POWER%20Agroclimatology-0B3D91.svg)](https://power.larc.nasa.gov/)
 [![ISRIC SoilGrids](https://img.shields.io/badge/Soil%20Data-ISRIC%20SoilGrids%20250m-green.svg)](https://soilgrids.org/)
+[![Three.js](https://img.shields.io/badge/WebGL-Three.js%20r128-black.svg)](https://threejs.org/)
+[![Google GenAI](https://img.shields.io/badge/AI-Google%20Gemini%202.5%20Flash-4285F4.svg)](https://ai.google.dev/)
 
 ---
 
-## 🎯 Executive Summary & Problem Statement
+## 🎯 Executive Summary & Platform Architecture
 
-Farmers worldwide face severe climate headwinds: shifting rainfall baselines, prolonged dry spells, extreme heat days during critical flowering windows, and depleting soil organic matter. In traditional monoculture or simple two-crop rotations (such as continuous corn or corn-soybean), these stresses lead to depleted aquifers, escalating fertilizer costs, compaction, and yield volatility.
+Farmers worldwide face severe climate headwinds: shifting precipitation envelopes, delayed monsoon onsets, prolonged dry spells, extreme reproductive heat during flowering (>35°C), and degrading soil organic carbon. In continuous monocultures or rigid two-crop rotations, these pressures lead to aquifer depletion, escalating synthetic nitrogen costs, and catastrophic yield volatility.
 
-**FieldShift Rotation Advisor** is an open-source, deterministic decision-support tool that connects NASA Earth observations and gridded soil intelligence with transparent agronomic science. It empowers farmers to evaluate 3-season crop rotation sequences tailored to their exact location, field history, and strategic priorities (water savings, soil health, economic stability, or climate resilience).
+**FieldShift** is an open-source, multi-page tactical agroecological platform that operationalizes NASA Earth Observations, ISRIC global gridded soil stratigraphy, FAO-56 irrigation models, and Google Gemini AI into an interactive decision-support cockpit.
 
----
-
-## 🛰️ How NASA Data is Used
-
-FieldShift connects directly to the **NASA Prediction Of Worldwide Energy Resources (POWER) Agroclimatology API**:
-- **Dataset:** Daily point meteorological records (15-year historical horizon, 2010–2024).
-- **Core Parameters:**
-  - `PRECTOTCORR`: Bias-corrected precipitation (calculating annual rainfall normals, decadal rainfall trend, and dry-spell frequency >14 consecutive rain-free days).
-  - `T2M`: Daily 2-meter air temperature (calculating long-term warming trajectory and degree-day trends).
-  - `T2M_MAX`: Maximum daily temperature (identifying frequency of extreme heat stress days >35°C during crop reproductive stages).
-- **Data Provenance:** NASA Langley Research Center POWER Project (`https://power.larc.nasa.gov/api/temporal/daily/point`, Community: `AG`).
+The platform is organized into two tactical tiers across 6 coordinated modules:
+- **TACTICAL PLATFORM:**
+  - `01 // MISSION CONTROL`: Hero 3D Earth Cockpit with bidirectional target locking (`declare_component`), lightsaber sliders, 15-year NASA POWER daily agroclimatology reanalysis, multi-objective rotation scoring, and NASA GIBS satellite recon.
+  - `02 // CLIMATE SIMULATOR`: Parametric what-if stress testing (temperature anomaly, rainfall shifts, irrigation caps, monsoon lag) with FAO-56 Hargreaves-Samani reference evapotranspiration ($ET_0$) water balance and side-by-side resilience re-scoring.
+  - `03 // 3D DIGITAL TWIN`: Procedural WebGL canopy and subterranean soil cutaway powered by Three.js (`InstancedMesh`), dynamic soil texture coloring, FAO rooting depths, 6 growth stages, 4 seasonal lighting environments, and animated pore-water infiltration droplets.
+  - `04 // AI AGRONOMIST`: Grounded decision support powered by the official Google GenAI SDK (`google-genai`), passing compact structured JSON farm telemetry into Gemini 2.5 Flash, with strict anti-hallucination guardrails, multi-lingual support (English, Hindi, Kannada, Spanish), and a deterministic FAO rule-based fallback when offline.
+- **ANALYSIS & GOVERNANCE:**
+  - `05 // FARM REPORT & DOSSIER`: Instant pure-Python PDF report generation via ReportLab (with embedded Matplotlib 15-year climate charts), CSV sequence tables, JSON API payloads, an interactive 15-core Soil Sampling Planner, and a local validation checklist.
+  - `06 // METHODOLOGY & DATA`: Comprehensive open-science provenance registry, mathematical equations (rotation composite score, Hargreaves $ET_0$, heat vulnerability), crop parameter citations, worked numerical example, and explicit scientific limitations.
 
 ---
 
-## 🧪 Local Soil Data Integration
+## 🛰️ NASA Earth Observations & Data Pipeline
 
-- **ISRIC SoilGrids 250m REST API v2.0:** Integrates physical and chemical soil properties across the 0–30 cm root-zone profile:
-  - Clay & Sand fractions (% texture) to determine water-holding capacity and drainage class.
-  - Soil Organic Carbon (SOC %) to baseline biological soil health and fertility potential.
-  - Soil pH ($H_2O$) to screen crop acid/alkaline tolerances.
-- **Farmer Lab Test Override:** Farmers can enter their own certified soil test values directly in the sidebar for customized field diagnostics.
+FieldShift connects directly to official NASA Earth Science APIs:
+1. **NASA POWER Agroclimatology API** (`power.larc.nasa.gov`):
+   - Streams 15 years (2010–2024) of daily reanalysis (~50 km resolution) for any global coordinate:
+     - `PRECTOTCORR`: Daily bias-corrected precipitation (annual normals, decadal trend slope, and dry spells >14 days).
+     - `T2M`: Mean 2-meter air temperature and decadal warming rate.
+     - `T2M_MAX`: Daily maximum temperature (tracking frequency of extreme heat days >35°C during anthesis).
+2. **NASA GIBS WMTS Satellite Telemetry** (`gibs.earthdata.nasa.gov`):
+   - Multi-layer raster satellite recon in Web Mercator (EPSG:3857):
+     - `MODIS Terra True Color`: Corrected reflectance (250m daily optical).
+     - `MODIS Terra 16-Day NDVI`: Normalized Difference Vegetation Index (250m composite).
+     - `GPM IMERG Daily Precipitation Rate`: Global Precipitation Measurement (~10km).
+     - `SMAP L3 Surface Soil Moisture`: Soil Moisture Active Passive (9km enhanced dielectric).
+     - `NASA Blue Marble`: Static global shaded relief topography (500m).
+3. **ISRIC SoilGrids 250m v2.0 REST API** (`rest.isric.org`):
+   - Physical and chemical soil properties across the 0–30 cm root-zone horizon: Clay %, Sand %, Soil Organic Carbon (SOC %), and Soil pH ($H_2O$), with manual farmer lab override support.
 
 ---
 
-## ⚙️ Agronomic Knowledge Base & Rotation Engine
+## 🌾 Crop Database & Regional Agrarian Presets
 
-FieldShift embeds an FAO-grounded crop database (`crops.csv`) containing 8 foundational food, feed, and cover crops:
-- Maize (*Zea mays*), Soybean (*Glycine max*), Winter Wheat (*Triticum aestivum*), Grain Sorghum (*Sorghum bicolor*), Chickpea (*Cicer arietinum*), Alfalfa (*Medicago sativa*), Sunflower (*Helianthus annuus*), and Multi-Species Cover Crop (Clover-Rye mix).
+FieldShift embeds an expanded FAO-grounded crop database (`crops.csv`) containing 11 international and Indian regional crops:
+- Maize (*Zea mays*), Soybean (*Glycine max*), Winter Wheat (*Triticum aestivum*), Grain Sorghum (*Sorghum bicolor*), Chickpea (*Cicer arietinum*), Alfalfa (*Medicago sativa*), Sunflower (*Helianthus annuus*), Multi-Species Cover Crop (Clover-Rye), Finger Millet / Ragi (*Eleusine coracana*), Pigeon Pea / Tur (*Cajanus cajan*), and Groundnut (*Arachis hypogaea*).
 
-### Agronomic Decision Rules:
-1. **Botanical Family Pest-Break Rule:** Strictly prohibits planting the same botanical family back-to-back (e.g., Poaceae grass to Poaceae grass) to break nematode, weed, and fungal disease cycles.
-2. **Biological Nitrogen Fixation Rule:** Mandates the inclusion of at least one nitrogen-fixing legume (*Fabaceae*) or legume cover crop within the 3-year cycle, directly cutting synthetic fertilizer dependency and greenhouse gas emissions.
-3. **Root Architecture Synergy:** Rewards the strategic pairing of fibrous-rooted crops with deep taproot species (e.g., Sunflower or Alfalfa reaching 1.8–2.5m) to naturally bio-drill through compacted plow pans and scavenge subsoil moisture.
-4. **Hydrological Feasibility:** Computes cumulative seasonal water demand against the 15-year NASA precipitation envelope to safeguard against groundwater overdraft.
+### Benchmark Agricultural Presets:
+- **Lubbock, Texas, USA** (Semi-Arid High Plains, Ogallala Aquifer stress)
+- **Hubballi-Dharwad, Karnataka, India** (Northern Transition Zone, Vertisol black cotton soil)
+- **Raichur, Karnataka, India** (North Eastern Dry Zone, Tungabhadra basin)
+- **Mandya, Karnataka, India** (Southern Dry Zone, Cauvery basin)
+- **Ames, Iowa, USA** (Humid Corn Belt)
+- **Ludhiana, Punjab, India** (Indo-Gangetic Plain)
+- **Nakuru, Rift Valley, Kenya** (Equatorial Highland)
+- **Sorriso, Mato Grosso, Brazil** (Cerrado Savanna)
+- **Poltava, Ukraine** (Chernozem Steppe)
+- **Dubbo, New South Wales, Australia** (Murray-Darling Basin)
 
 ---
 
@@ -58,62 +74,33 @@ FieldShift embeds an FAO-grounded crop database (`crops.csv`) containing 8 found
 
 ### Prerequisites
 - Python 3.10, 3.11, or 3.12
-- Git
+- Internet access for live NASA POWER and SoilGrids API calls (automatic cached fallback enabled if offline)
 
-### 1. Clone the Repository
+### Installation
 ```bash
-git clone https://github.com/YOUR_USERNAME/fieldshift-rotation-advisor.git
-cd fieldshift-rotation-advisor
-```
+# Clone the repository
+git clone https://github.com/your-username/fieldshift.git
+cd fieldshift
 
-### 2. Create and Activate a Virtual Environment
-```bash
-# On Windows
-python -m venv .venv
-.venv\Scripts\activate
-
-# On macOS/Linux
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-### 3. Install Dependencies
-```bash
+# Install dependencies
 pip install -r requirements.txt
-```
 
-### 4. Run the Streamlit Application
-```bash
+# Run the platform
 streamlit run app.py
 ```
-Open `http://localhost:8501` in your web browser.
+
+### Optional: Google Gemini API Key
+To enable live AI Agronomist responses via Gemini 2.5 Flash:
+1. Obtain a free API key from [Google AI Studio](https://aistudio.google.com/apikey).
+2. Set it in `.streamlit/secrets.toml`:
+   ```toml
+   GEMINI_API_KEY = "your_actual_key_here"
+   ```
+   *(Or enter it directly in the AI Agronomist sidebar in the app).*
 
 ---
 
-## 📁 Repository Structure
-
-```
-FieldShift/
-├── app.py                # Main Streamlit web application & scoring engine
-├── crops.csv             # FAO-grounded crop agronomic database
-├── requirements.txt      # Core Python dependencies
-├── .gitignore            # Git exclusion rules
-└── README.md             # Project documentation, architecture & pitch
-```
-
----
-
-## 📚 References & Scientific Sources
-
-1. **NASA POWER Project:** Daily Agroclimatology Data Archive, NASA Langley Research Center. API: `https://power.larc.nasa.gov/api/temporal/daily/point`.
-2. **ISRIC SoilGrids 250m:** Poggio et al. (2021). *SoilGrids 2.0: producing soil property maps with Python and machine learning*. SOIL, 7, 217–240. API: `https://rest.isric.org/soilgrids/v2.0/properties/query`.
-3. **FAO Irrigation & Drainage Paper No. 56:** Allen, R. G., Pereira, L. S., Raes, D., & Smith, M. (1998). *Crop evapotranspiration - Guidelines for computing crop water requirements*. Food and Agriculture Organization of the United Nations, Rome.
-4. **FAO Irrigation & Drainage Paper No. 33:** Doorenbos, J., & Kassam, A. H. (1979). *Yield response to water*. FAO, Rome.
-5. **FAO EcoCrop & Soil Bulletin 80:** Biological Nitrogen Fixation, soil cover management, and crop ecological requirements.
-
----
-
-## 🏆 NASA Space Apps Challenge 2026 Submission Note
-- **Hackathon:** NASA International Space Apps Challenge 2026 (Nov 14–15, 2026)
-- **Challenge Track:** *Field Shift: Adapting Farms with NASA Data*
-- **License:** Open Source under the MIT License.
+## 📜 Scientific Limitations & Provenance Disclaimer
+- **Spatial Resolution:** NASA POWER (~50 km) and ISRIC SoilGrids (250m) represent regional reanalysis and digital soil mapping, not sub-meter field measurements.
+- **Yield Claims:** FieldShift never claims exact metric tons per hectare or guarantees financial profits; recommendations represent relative resilience scores based on FAO crop coefficient tables.
+- **Extension Validation:** All rotations should be validated with local county agricultural extension services and certified physical soil testing.

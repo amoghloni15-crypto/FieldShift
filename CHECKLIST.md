@@ -1,0 +1,37 @@
+# FIELDSHIFT UPGRADE CHECKLIST (NASA Space Apps 2026)
+
+## Progress Overview
+- [x] Initial Project Safety Backup (`backup_pre_upgrade/`)
+- [x] **Tier 1: Foundation, Methodology & Farm Reports** (VERIFIED & COMPLETED)
+  - [x] Multi-Page Architecture (`st.navigation` / `st.Page` with shared HUD layout)
+  - [x] Shared Session State Bridge & Non-Widget Key Persistence
+  - [x] Data Provenance Chips (`LIVE API`, `DERIVED`, `MODELED`, `FARMER INPUT`, `APPROXIMATE TABLE`, `FALLBACK DEMO`)
+  - [x] Page 1: Mission Control (Hero 3D Earth Cockpit, Lightsaber Sliders, Agro Intel, GIBS Map)
+  - [x] Page 5: Farm Report (PDF Export via ReportLab, CSV, JSON, Soil Sampling Planner)
+  - [x] Page 6: Scientific Methodology & Provenance Registry (Full metadata, formula disclosures, worked example)
+  - [x] Checkpoint T1 (`checkpoint_T1/`) & Browser Verification
+- [x] **Tier 2: Climate Scenario Simulator** (VERIFIED & COMPLETED)
+  - [x] Controls: Temperature anomaly, Rainfall scale, Irrigation availability, Monsoon lag, Dry spell shift
+  - [x] Presets: Baseline, Reduced rainfall, Extreme rainfall, Heat stress, Delayed rains, Reduced irrigation, Hypothetical 2040
+  - [x] Dynamic series transformation & Hargreaves-Samani ET0 water balance
+  - [x] Resilience comparison side-by-side rescoring against current practice
+  - [x] Checkpoint T2 (`checkpoint_T2/`) & Browser Verification
+- [x] **Tier 3: 3D Farm Digital Twin** (VERIFIED & COMPLETED)
+  - [x] Three.js WebGL component (InstancedMesh crop rows, dynamic terrain, sky, lighting)
+  - [x] Data-driven link to selected farm rotation, crops.csv rooting depths, and soil texture
+  - [x] Controls: Orbit camera presets, 4-season selector, 6-stage growth slider, soil cutaway toggle
+  - [x] Provenance badges & WebGL fallback card
+  - [x] Checkpoint T3 (`checkpoint_T3/`) & Browser Verification
+- [x] **Tier 4: AI Agronomist (Gemini)** (VERIFIED & COMPLETED)
+  - [x] Official Google GenAI SDK integration via `st.secrets["GEMINI_API_KEY"]` / env var
+  - [x] Grounded system prompt with strict context payload (no hallucinated yields)
+  - [x] Tactical chat UI with question chips, language selector, technical mode toggle
+  - [x] Deterministic rule-based fallback explainer when offline / without API key
+  - [x] Checkpoint T4 (`checkpoint_T4/`) & Browser Verification
+- [x] **Tier 5: Platform Extras & Regional Extensions** (VERIFIED & COMPLETED)
+  - [x] NASA GIBS Multi-Layer Manager (MODIS True Color, MODIS 16-Day NDVI, GPM IMERG Precipitation, SMAP Soil Moisture, Blue Marble) with opacity slider
+  - [x] Indian regional crops (Finger Millet / Ragi, Pigeon Pea / Tur, Groundnut) in `crops.csv`
+  - [x] Karnataka agrarian presets (Hubballi-Dharwad, Raichur, Mandya) in `core/presets.py`
+  - [x] Parcel geodesic telemetry & acreage calculator (lat/lon centroid, acres, hectares, perimeter)
+  - [x] Guided Mission Walkthrough Mode (5 Pillars Tour) on Mission Control
+  - [x] Checkpoint T5 (`checkpoint_T5/`) & Comprehensive Browser Verification
