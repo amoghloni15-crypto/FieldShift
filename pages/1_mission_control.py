@@ -470,8 +470,13 @@ with tab3:
 
         fig_map = go.Figure()
         
+        # Dual-version compatibility for Plotly 5 (Scattermapbox) and Plotly 6 (Scattermap)
+        use_new_map = hasattr(go, "Scattermap")
+        ScatterMapTrace = go.Scattermap if use_new_map else getattr(go, "Scattermapbox")
+        map_kw = "map" if use_new_map else "mapbox"
+
         # Add polygon perimeter trace
-        fig_map.add_trace(go.Scattermapbox(
+        fig_map.add_trace(ScatterMapTrace(
             lat=poly_lats,
             lon=poly_lons,
             mode='lines',
@@ -481,7 +486,7 @@ with tab3:
         ))
 
         # Add center target marker
-        fig_map.add_trace(go.Scattermapbox(
+        fig_map.add_trace(ScatterMapTrace(
             lat=[latitude],
             lon=[longitude],
             mode='markers+text',
@@ -492,28 +497,30 @@ with tab3:
             name="Field Centroid"
         ))
 
-        fig_map.update_layout(
-            mapbox=dict(
-                style="white-bg",
-                layers=[
-                    dict(
-                        sourcetype="raster",
-                        source=[tile_url],
-                        below="traces",
-                        minzoom=0,
-                        maxzoom=max_zoom,
-                        opacity=layer_opacity
-                    )
-                ],
-                center=dict(lat=latitude, lon=longitude),
-                zoom=6.0 if max_zoom <= 6 else 7.5
-            ),
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="#0A1118",
-            margin=dict(l=0, r=0, t=0, b=0),
-            height=380,
-            showlegend=False,
-            annotations=[
+        map_config = dict(
+            style="white-bg",
+            layers=[
+                dict(
+                    sourcetype="raster",
+                    source=[tile_url],
+                    below="traces",
+                    minzoom=0,
+                    maxzoom=max_zoom,
+                    opacity=layer_opacity
+                )
+            ],
+            center=dict(lat=latitude, lon=longitude),
+            zoom=6.0 if max_zoom <= 6 else 7.5
+        )
+
+        layout_kwargs = {
+            map_kw: map_config,
+            "paper_bgcolor": "rgba(0,0,0,0)",
+            "plot_bgcolor": "#0A1118",
+            "margin": dict(l=0, r=0, t=0, b=0),
+            "height": 380,
+            "showlegend": False,
+            "annotations": [
                 dict(
                     text="Imagery: NASA GIBS / EOSDIS (EPSG:3857)",
                     xref="paper",
@@ -529,7 +536,8 @@ with tab3:
                     borderwidth=1
                 )
             ]
-        )
+        }
+        fig_map.update_layout(**layout_kwargs)
         st.plotly_chart(fig_map, use_container_width=True)
 
     with col_map2:
